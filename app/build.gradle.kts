@@ -59,6 +59,10 @@ tasks.test {
     finalizedBy(tasks.jacocoTestReport)
 }
 
+tasks.withType(JavaExec) {
+    standardInput = System.in
+}
+
 application {
     mainClass.set("hexlet.code.App")
 }
