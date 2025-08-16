@@ -9,7 +9,7 @@ public class App {
 
     public static Javalin getApp() {
         Javalin app = Javalin.create(config -> {
-            config.pluggins.enableDevLogging();
+            config.plugins.enableDevLogging();
         });
         app.get("/", ctx -> ctx.result("Hi"));
         return app;
