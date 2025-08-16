@@ -1,29 +1,28 @@
-# Используем официальный образ OpenJDK 22 с Gradle
+# Базовый образ
 FROM openjdk:22-jdk-slim
 
 # Рабочая директория внутри контейнера
 WORKDIR /app
 
-# Копируем Gradle wrapper и build файлы
-COPY ./gradlew ./gradlew
-COPY ./gradle ./gradle
-COPY ./build.gradle ./build.gradle
-COPY ./settings.gradle ./settings.gradle
+# Копируем Gradle wrapper и папку gradle
+COPY gradlew .
+COPY gradle ./gradle
+
+# Копируем основные Gradle файлы
+COPY build.gradle .
+COPY settings.gradle .
 
 # Делаем gradlew исполняемым
-RUN chmod +x ./gradlew
+RUN chmod +x gradlew
 
-# Скачиваем зависимости и билдим проект (без тестов)
-RUN ./gradlew build -x test --no-daemon
+# Копируем весь исходный код
+COPY src ./src
 
-# Копируем весь код проекта
-COPY ./ ./
+# Собираем проект
+RUN ./gradlew build --no-daemon
 
-# Собираем fat-jar через Shadow плагин
-RUN ./gradlew shadowJar --no-daemon
-
-# Переменная окружения для порта
-ENV PORT=7000
+# Пробрасываем порт (если это веб-приложение)
+EXPOSE 8080
 
 # Запуск приложения
-CMD ["java", "-jar", "build/libs/app-1.0-SNAPSHOT-all.jar"]
+CMD ["java", "-jar", "build/libs/app.jar"]
