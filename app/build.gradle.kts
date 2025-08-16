@@ -5,6 +5,7 @@ plugins {
     id ("checkstyle")
     id("org.sonarqube") version "6.2.0.5505"
     id("jacoco")
+    id ("com.github.johnrengelman.shadow") version "8.1.1"
 }
 jacoco {
     toolVersion = ("0.8.11")
@@ -41,6 +42,8 @@ dependencies {
     testRuntimeOnly ("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     implementation ("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.0")
     testImplementation ("org.assertj:assertj-core:3.24.2")
+    implementation ("io.javalin:javalin:5.6.3")
+    implementation ("org.slf4j:slf4j-simple:2.0.16")
 }
 
 tasks.jacocoTestReport {
