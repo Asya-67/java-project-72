@@ -16,7 +16,7 @@ public class App {
     }
 
     public static void main(String[] args) {
-        logger.info("Starting application...");
+        LOGGER.info("Starting application...");
         Javalin app = getApp();
 
         int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "7070"));
