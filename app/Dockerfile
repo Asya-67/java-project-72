@@ -6,9 +6,9 @@ WORKDIR /app
 COPY gradlew .
 COPY gradle ./gradle
 
-# Копируем Gradle файлы
-COPY build.gradle .
-COPY settings.gradle .
+# Копируем Gradle Kotlin DSL файлы
+COPY build.gradle.kts .
+COPY settings.gradle.kts .
 
 RUN chmod +x gradlew
 
@@ -18,6 +18,8 @@ COPY src ./src
 # Собираем проект
 RUN ./gradlew build --no-daemon
 
-EXPOSE 8080
+# Пробрасываем порт 7000
+EXPOSE 7000
 
-CMD ["java", "-jar", "build/libs/app.jar"]
+# Запуск приложения с нужным JAR
+CMD ["java", "-jar", "build/libs/app-1.0-SNAPSHOT-all.jar"]
