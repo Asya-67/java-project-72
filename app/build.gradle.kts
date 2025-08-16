@@ -7,6 +7,9 @@ plugins {
     id("jacoco")
     id ("com.github.johnrengelman.shadow") version "8.1.1"
 }
+
+import org.gradle.api.tasks.JavaExec
+
 jacoco {
     toolVersion = ("0.8.11")
 }
@@ -59,8 +62,8 @@ tasks.test {
     finalizedBy(tasks.jacocoTestReport)
 }
 
-tasks.withType(JavaExec) {
-    standardInput = System.in
+tasks.withType<JavaExec> {
+    standardInput = System.`in`
 }
 
 application {
