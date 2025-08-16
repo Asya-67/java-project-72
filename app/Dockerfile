@@ -3,17 +3,19 @@ FROM openjdk:22-jdk-slim
 WORKDIR /app
 
 # Копируем Gradle wrapper и папку gradle
-COPY app/gradlew .
-COPY app/gradle ./gradle
+COPY gradlew .
+COPY gradle ./gradle
 
-# Копируем Gradle файлы из корня
+# Копируем Gradle файлы
 COPY build.gradle .
 COPY settings.gradle .
 
 RUN chmod +x gradlew
 
-COPY app/src ./src
+# Копируем исходный код
+COPY src ./src
 
+# Собираем проект
 RUN ./gradlew build --no-daemon
 
 EXPOSE 8080
