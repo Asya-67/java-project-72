@@ -12,8 +12,9 @@ COPY settings.gradle.kts .
 
 RUN chmod +x gradlew
 
-# Копируем исходный код
+# Копируем исходный код и конфигурацию Checkstyle
 COPY src ./src
+COPY config ./config
 
 # Собираем проект
 RUN ./gradlew build --no-daemon
