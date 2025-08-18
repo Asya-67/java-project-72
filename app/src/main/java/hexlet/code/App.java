@@ -17,6 +17,9 @@ public class App {
 
     public static void main(String[] args) {
         LOGGER.info("Starting application...");
+
+        var dataSource = Database.getDataSource();
+        DbInitializer.init(dataSource);
         Javalin app = getApp();
 
         int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "7070"));
