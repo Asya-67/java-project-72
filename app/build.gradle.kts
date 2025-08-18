@@ -36,21 +36,34 @@ repositories {
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    implementation ("info.picocli:picocli:4.7.7")
-    annotationProcessor ("info.picocli:picocli-codegen:4.7.7")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
-    testImplementation ("org.junit.jupiter:junit-jupiter-api:5.10.0")
-    testRuntimeOnly ("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-    implementation ("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.0")
-    testImplementation ("org.assertj:assertj-core:3.24.2")
-    implementation ("io.javalin:javalin:5.6.3")
-    implementation ("org.slf4j:slf4j-simple:2.0.16")
+    // Javalin 5 и JTE
+    implementation("io.javalin:javalin:5.6.3")
+    implementation("io.javalin:javalin-rendering:6.1.6")
+    implementation("gg.jte:jte:3.1.9")
+    implementation("gg.jte:jte-runtime:1.15.1")
 
+    // SLF4J
+    implementation("org.slf4j:slf4j-simple:2.0.16")
+
+    // База данных
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("com.h2database:h2:2.2.224")
     implementation("org.postgresql:postgresql:42.7.3")
+
+    // Тестирование
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("org.assertj:assertj-core:3.24.2")
+
+    // Picocli
+    implementation("info.picocli:picocli:4.7.7")
+    annotationProcessor("info.picocli:picocli-codegen:4.7.7")
+
+    // Jackson
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.0")
 }
 
 tasks.jacocoTestReport {
