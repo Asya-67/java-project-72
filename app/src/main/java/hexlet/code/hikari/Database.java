@@ -11,10 +11,13 @@ public class Database {
     public static DataSource getDataSource() {
         if (dataSource == null) {
             HikariConfig config = new HikariConfig();
-            String jdbcUrl = System.getenv("JDBC_DATABASE_URL");
+            String databaseUrl = System.getenv("DATABASE_URL");
 
-            if (jdbcUrl != null && !jdbcUrl.isBlank()) {
-                config.setJdbcUrl(jdbcUrl);
+            if (databaseUrl != null && !databaseUrl.isBlank()) {
+                if (databaseUrl.startsWith("postgresql://")) {
+                    databaseUrl = "jdbc:" + databaseUrl;
+                }
+                config.setJdbcUrl(databaseUrl);
             } else {
                 config.setJdbcUrl("jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;");
                 config.setDriverClassName("org.h2.Driver");
