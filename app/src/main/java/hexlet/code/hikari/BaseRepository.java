@@ -1,4 +1,4 @@
-package hexlet.code.repository;
+package hexlet.code;
 
 import javax.sql.DataSource;
 

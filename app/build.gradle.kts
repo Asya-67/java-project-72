@@ -64,6 +64,10 @@ dependencies {
     // Jackson
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.0")
+
+
+    implementation("org.flywaydb:flyway-core:9.22.0")
+    implementation("org.postgresql:postgresql:42.7.2")
 }
 
 tasks.jacocoTestReport {

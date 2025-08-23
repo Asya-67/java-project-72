@@ -19,8 +19,8 @@ COPY config ./config
 # Собираем проект
 RUN ./gradlew build --no-daemon
 
-# Пробрасываем порт 7000
-EXPOSE 7000
+# Пробрасываем порт 7070
+EXPOSE 7070
 
 # Запуск приложения с нужным JAR
 CMD ["java", "-jar", "build/libs/app-1.0-SNAPSHOT-all.jar"]

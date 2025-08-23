@@ -1,4 +1,4 @@
-package hexlet.code.model;
+package hexlet.code;
 
 import java.sql.Timestamp;
 
