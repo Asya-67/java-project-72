@@ -25,12 +25,8 @@ public class App {
         return TemplateEngine.create(resolver, ContentType.Html);
     }
 
-    public static void main(String[] args) {
-        LOGGER.info("Starting application...");
-
+    public static Javalin createApp(DataSource dataSource) {
         TemplateEngine templateEngine = createTemplateEngine();
-
-        DataSource dataSource = Database.getDataSource();
         UrlRepository urlRepository = new UrlRepository(dataSource);
 
         Javalin app = Javalin.create(config -> {
@@ -55,8 +51,6 @@ public class App {
                 return;
             }
 
-            Url existing = null; // объявляем переменную здесь
-
             try {
                 URL url = URI.create(inputUrl).toURL();
                 String domain = url.getProtocol() + "://" + url.getHost();
@@ -64,7 +58,7 @@ public class App {
                     domain += ":" + url.getPort();
                 }
 
-                existing = urlRepository.findByName(domain);
+                Url existing = urlRepository.findByName(domain);
 
                 if (existing != null) {
                     ctx.sessionAttribute("flash", "Страница уже существует");
@@ -92,7 +86,13 @@ public class App {
             ctx.render("showUrl.jte");
         });
 
+        return app;
+    }
+
+    public static void main(String[] args) {
+        LOGGER.info("Starting application...");
         int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "7070"));
+        Javalin app = createApp(Database.getDataSource());
         app.start(port);
         LOGGER.info("Application started on port {}", port);
     }
