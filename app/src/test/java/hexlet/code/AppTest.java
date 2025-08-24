@@ -2,7 +2,7 @@ package hexlet.code;
 
 import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
-import io.javalin.testtools.TestHttpClient;
+import io.javalin.testtools.HttpClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,9 +37,9 @@ class AppTest {
     void testHomePage() {
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            TestHttpClient.Response response = client.get("/");
-            assertThat(response.body()).contains("Добавить сайт");
+            HttpClient.Response response = client.get("/");
             assertThat(response.code()).isEqualTo(200);
+            assertThat(response.body()).contains("Добавить сайт");
         });
     }
 
@@ -47,7 +47,8 @@ class AppTest {
     void testAddUrl() throws Exception {
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            TestHttpClient.Response response = client.postForm("/urls", "url=https://example.com");
+            HttpClient.Response response = client.post("/urls", "url=https://example.com");
+
             assertThat(response.code()).isEqualTo(302);
 
             UrlRepository repo = new UrlRepository(dataSource);
@@ -63,9 +64,9 @@ class AppTest {
 
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            TestHttpClient.Response response = client.get("/urls");
-            assertThat(response.body()).contains("https://hexlet.io");
+            HttpClient.Response response = client.get("/urls");
             assertThat(response.code()).isEqualTo(200);
+            assertThat(response.body()).contains("https://hexlet.io");
         });
     }
 
@@ -77,9 +78,9 @@ class AppTest {
 
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            TestHttpClient.Response response = client.get("/urls/" + url.getId());
-            assertThat(response.body()).contains("https://hexlet.io");
+            HttpClient.Response response = client.get("/urls/" + url.getId());
             assertThat(response.code()).isEqualTo(200);
+            assertThat(response.body()).contains("https://hexlet.io");
         });
     }
 }
