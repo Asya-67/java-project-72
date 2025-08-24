@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AppTest {
@@ -18,6 +19,7 @@ class AppTest {
     static void setup() {
         dataSource = Database.getDataSource();
     }
+
     @BeforeEach
     void cleanDb() throws Exception {
         try (Connection conn = dataSource.getConnection();
@@ -30,16 +32,18 @@ class AppTest {
     void testHomePage() {
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            var response = client.get("/").asString();
-            assertThat(response.getBody()).contains("Добавить сайт");
+            var response = client.get("/");
+            assertThat(response.body()).contains("Добавить сайт");
         });
     }
 
     @Test
-    void testAddUrl() {
+    void testAddUrl() throws Exception {
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            client.post("/urls").form("url", "https://example.com").asString();
+            var response = client.post("/urls", "url=https://example.com");
+
+            assertThat(response.statusCode()).isEqualTo(200);
 
             UrlRepository repo = new UrlRepository(dataSource);
             List<Url> urls = repo.findAll();
@@ -49,26 +53,27 @@ class AppTest {
     }
 
     @Test
-    void testUrlsPage() {
+    void testUrlsPage() throws Exception {
         UrlRepository repo = new UrlRepository(dataSource);
         repo.save(new Url("https://hexlet.io", new Timestamp(System.currentTimeMillis())));
 
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            var response = client.get("/urls").asString();
-            assertThat(response.getBody()).contains("https://hexlet.io");
+            var response = client.get("/urls");
+            assertThat(response.body()).contains("https://hexlet.io");
         });
     }
 
     @Test
-    void testShowUrlPage() {
+    void testShowUrlPage() throws Exception {
         UrlRepository repo = new UrlRepository(dataSource);
-        Url url = repo.save(new Url("https://hexlet.io", new Timestamp(System.currentTimeMillis())));
+        Url url = new Url("https://hexlet.io", new Timestamp(System.currentTimeMillis()));
+        repo.save(url);
 
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            var response = client.get("/urls/" + url.getId()).asString();
-            assertThat(response.getBody()).contains("https://hexlet.io");
+            var response = client.get("/urls/" + url.getId());
+            assertThat(response.body()).contains("https://hexlet.io");
         });
     }
 }
