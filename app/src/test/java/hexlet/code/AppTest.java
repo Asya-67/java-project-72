@@ -2,8 +2,12 @@ package hexlet.code;
 
 import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
-import io.javalin.testtools.HttpResponse;
-import org.junit.jupiter.api.*;
+import io.javalin.testtools.TestHttpClient;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -33,8 +37,9 @@ class AppTest {
     void testHomePage() {
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            HttpResponse<String> response = client.get("/");
+            TestHttpClient.Response response = client.get("/");
             assertThat(response.body()).contains("Добавить сайт");
+            assertThat(response.code()).isEqualTo(200);
         });
     }
 
@@ -42,13 +47,11 @@ class AppTest {
     void testAddUrl() throws Exception {
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            HttpResponse<String> response = client.post("/urls", "url=https://example.com");
-
-            assertThat(response.code()).isEqualTo(200);
+            TestHttpClient.Response response = client.postForm("/urls", "url=https://example.com");
+            assertThat(response.code()).isEqualTo(302);
 
             UrlRepository repo = new UrlRepository(dataSource);
             List<Url> urls = repo.findAll();
-
             assertThat(urls).anyMatch(u -> u.getName().equals("https://example.com"));
         });
     }
@@ -60,8 +63,9 @@ class AppTest {
 
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            HttpResponse<String> response = client.get("/urls");
+            TestHttpClient.Response response = client.get("/urls");
             assertThat(response.body()).contains("https://hexlet.io");
+            assertThat(response.code()).isEqualTo(200);
         });
     }
 
@@ -73,8 +77,9 @@ class AppTest {
 
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            HttpResponse<String> response = client.get("/urls/" + url.getId());
+            TestHttpClient.Response response = client.get("/urls/" + url.getId());
             assertThat(response.body()).contains("https://hexlet.io");
+            assertThat(response.code()).isEqualTo(200);
         });
     }
 }
