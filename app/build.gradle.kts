@@ -68,6 +68,8 @@ dependencies {
 
     implementation("org.flywaydb:flyway-core:9.22.0")
     implementation("org.postgresql:postgresql:42.7.2")
+
+    testImplementation("io.javalin:javalin-testtools:6.1.3")
 }
 
 tasks.jacocoTestReport {
