@@ -2,6 +2,7 @@ package hexlet.code;
 
 import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
+import io.javalin.testtools.HttpResponse;
 import org.junit.jupiter.api.*;
 
 import javax.sql.DataSource;
@@ -32,7 +33,7 @@ class AppTest {
     void testHomePage() {
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            var response = client.get("/");
+            HttpResponse<String> response = client.get("/");
             assertThat(response.body()).contains("Добавить сайт");
         });
     }
@@ -41,9 +42,9 @@ class AppTest {
     void testAddUrl() throws Exception {
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            var response = client.post("/urls", "url=https://example.com");
+            HttpResponse<String> response = client.post("/urls", "url=https://example.com");
 
-            assertThat(response.statusCode()).isEqualTo(200);
+            assertThat(response.code()).isEqualTo(200);
 
             UrlRepository repo = new UrlRepository(dataSource);
             List<Url> urls = repo.findAll();
@@ -59,7 +60,7 @@ class AppTest {
 
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            var response = client.get("/urls");
+            HttpResponse<String> response = client.get("/urls");
             assertThat(response.body()).contains("https://hexlet.io");
         });
     }
@@ -72,7 +73,7 @@ class AppTest {
 
         Javalin app = App.createApp(dataSource);
         JavalinTest.test(app, (server, client) -> {
-            var response = client.get("/urls/" + url.getId());
+            HttpResponse<String> response = client.get("/urls/" + url.getId());
             assertThat(response.body()).contains("https://hexlet.io");
         });
     }
