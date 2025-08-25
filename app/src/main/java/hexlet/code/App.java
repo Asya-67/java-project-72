@@ -21,7 +21,11 @@ public class App {
     public static void main(String[] args) {
         initApp();
         Javalin app = getApp();
-        app.start(7000);
+
+        String port = System.getenv("PORT");
+        int portNumber = port != null ? Integer.parseInt(port) : 7000;
+
+        app.start(portNumber);
     }
 
     public static void initApp() {

@@ -81,3 +81,23 @@ tasks.withType<JavaExec> {
 application {
     mainClass.set("hexlet.code.App")
 }
+
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+    archiveClassifier.set("")
+    manifest {
+        attributes["Main-Class"] = "hexlet.code.App"
+    }
+}
+
+tasks.startShadowScripts {
+    dependsOn(tasks.shadowJar)
+    mainClass.set("hexlet.code.App")
+}
+
+tasks.distZip {
+    dependsOn(tasks.shadowJar)
+}
+
+tasks.distTar {
+    dependsOn(tasks.shadowJar)
+}
