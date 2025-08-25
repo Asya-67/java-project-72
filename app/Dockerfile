@@ -16,12 +16,12 @@ RUN chmod +x gradlew
 COPY src ./src
 COPY config ./config
 
-# Собираем проект
-RUN ./gradlew clean build --no-daemon
+# Собираем shadowJar вместо обычного build
+RUN ./gradlew clean shadowJar --no-daemon
 
 # Пробрасываем порт из переменной окружения или дефолт 7070
 ENV PORT 7070
 EXPOSE $PORT
 
-# Запуск приложения с нужным JAR
+# Запуск приложения через shadowJar
 CMD ["sh", "-c", "java -jar build/libs/app-1.0-SNAPSHOT.jar --server.port=$PORT"]

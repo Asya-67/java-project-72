@@ -1,34 +1,17 @@
 plugins {
     id("java")
-    id ("application")
-    id ("com.github.ben-manes.versions") version "0.51.0"
-    id ("checkstyle")
+    id("application")
+    id("com.github.ben-manes.versions") version "0.51.0"
+    id("checkstyle")
     id("org.sonarqube") version "6.2.0.5505"
     id("jacoco")
-    id ("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 import org.gradle.api.tasks.JavaExec
+        import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-jacoco {
-    toolVersion = ("0.8.11")
-}
-
-sonar {
-    properties {
-        property ("sonar.projectKey", "Asya-67_java-project-72")
-        property ("sonar.organization", "asya-67-71")
-        property ("sonar.host.url", "https://sonarcloud.io")
-    }
-}
-
-checkstyle {
-    toolVersion = ("10.26.1")
-    configFile = rootProject.file("config/checkstyle/checkstyle.xml")
-    isShowViolations = true
-}
-
-group = "hexlet.code"
+        group = "hexlet.code"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -58,7 +41,25 @@ dependencies {
     testImplementation("io.javalin:javalin-testtools:5.6.1")
     testImplementation("com.squareup.okhttp3:okhttp:4.11.0")
     testImplementation("com.squareup.okhttp3:okhttp-urlconnection:4.11.0")
-    testImplementation ("com.konghq:unirest-java:3.13.6")
+    testImplementation("com.konghq:unirest-java:3.13.6")
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+checkstyle {
+    toolVersion = "10.26.1"
+    configFile = rootProject.file("config/checkstyle/checkstyle.xml")
+    isShowViolations = true
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "Asya-67_java-project-72")
+        property("sonar.organization", "asya-67-71")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
 }
 
 tasks.jacocoTestReport {
@@ -81,3 +82,24 @@ tasks.withType<JavaExec> {
 application {
     mainClass.set("hexlet.code.App")
 }
+
+tasks.withType<ShadowJar> {
+    archiveClassifier.set("") // shadowJar без "-all"
+    manifest {
+        attributes["Main-Class"] = "hexlet.code.App"
+    }
+}
+
+// Отключаем конфликтующие задачи
+tasks.startScripts { enabled = false }
+tasks.startShadowScripts { enabled = false }
+tasks.distZip { enabled = false }
+tasks.distTar { enabled = false }
+
+// Задача для сборки ShadowJar
+tasks.register("buildShadow") {
+    dependsOn(tasks.shadowJar)
+}
+
+tasks.shadowDistTar { enabled = false }
+tasks.shadowDistZip { enabled = false }
