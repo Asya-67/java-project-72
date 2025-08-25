@@ -7,13 +7,6 @@
 </head>
 <body class="container mt-5">
     <h1>Добавленные URL</h1>
-
-    @if(flash != null)
-    <div class="alert alert-info" role="alert">
-        @flash
-    </div>
-    @end
-
     <table class="table table-striped mt-3">
         <thead>
             <tr>

@@ -36,9 +36,9 @@ repositories {
 }
 
 dependencies {
-    // Javalin 5 и JTE
+    // Javalin и шаблоны JTE
     implementation("io.javalin:javalin:5.6.3")
-    implementation("io.javalin:javalin-rendering:6.1.6")
+    implementation("io.javalin:javalin-rendering:5.6.3")
     implementation("gg.jte:jte:3.1.9")
     implementation("gg.jte:jte-runtime:1.15.1")
 
@@ -53,23 +53,12 @@ dependencies {
     // Тестирование
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.assertj:assertj-core:3.24.2")
-
-    // Picocli
-    implementation("info.picocli:picocli:4.7.7")
-    annotationProcessor("info.picocli:picocli-codegen:4.7.7")
-
-    // Jackson
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.0")
-
-
-    implementation("org.flywaydb:flyway-core:9.22.0")
-    implementation("org.postgresql:postgresql:42.7.2")
-
-    testImplementation("io.javalin:javalin-testtools:6.1.3")
+    testImplementation("io.javalin:javalin-testtools:5.6.1")
+    testImplementation("com.squareup.okhttp3:okhttp:4.11.0")
+    testImplementation("com.squareup.okhttp3:okhttp-urlconnection:4.11.0")
+    testImplementation ("com.konghq:unirest-java:3.13.6")
 }
 
 tasks.jacocoTestReport {

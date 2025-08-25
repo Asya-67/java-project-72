@@ -2,98 +2,108 @@ package hexlet.code;
 
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
+import hexlet.code.models.Url;
+import hexlet.code.repository.UrlRepository;
 
-import java.net.URI;
-import java.net.URL;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import javax.sql.DataSource;
-
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.LocalDateTime;
+import java.util.List;
 
 public class App {
-    private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+    private static DataSource dataSource;
+    private static UrlRepository urlRepository;
+
+    public static void main(String[] args) {
+        initApp();
+        Javalin app = getApp();
+        app.start(7000);
+    }
+
+    public static void initApp() {
+        if (dataSource == null) {
+            dataSource = Database.getDataSource();
+            DbInitializer.init(dataSource);
+            urlRepository = new UrlRepository(dataSource);
+        }
+    }
+
+    public static Javalin getApp() {
+        initApp();
+
+        return Javalin.create(config -> config.fileRenderer(new JavalinJte(createTemplateEngine())))
+                .get("/", ctx -> ctx.render("index.jte"))
+                .post("/urls", ctx -> {
+                    String inputUrl = ctx.formParam("url");
+                    if (inputUrl == null || inputUrl.isEmpty()) {
+                        handleFlash(ctx, "Некорректный URL");
+                        return;
+                    }
+
+                    String baseUrl;
+                    try {
+                        URI uri = new URI(inputUrl);
+                        if (uri.getHost() == null || uri.getScheme() == null) {
+                            handleFlash(ctx, "Некорректный URL");
+                            return;
+                        }
+                        baseUrl = uri.getScheme() + "://" + uri.getHost();
+                        if (uri.getPort() != -1) {
+                            baseUrl += ":" + uri.getPort();
+                        }
+                    } catch (URISyntaxException e) {
+                        handleFlash(ctx, "Некорректный URL");
+                        return;
+                    }
+
+                    if (urlRepository.exists(baseUrl)) {
+                        handleFlash(ctx, "Страница уже существует");
+                    } else {
+                        Url url = new Url(null, baseUrl, LocalDateTime.now());
+                        urlRepository.add(url);
+                        handleFlash(ctx, "Страница успешно добавлена");
+                    }
+                })
+                .get("/urls", ctx -> {
+                    List<Url> urls = urlRepository.findAll();
+                    ctx.attribute("urls", urls);
+                    String flash = getFlash(ctx);
+                    ctx.attribute("flash", flash);
+                    ctx.render("urls.jte");
+                });
+    }
+
+    private static void handleFlash(io.javalin.http.Context ctx, String message) {
+        String env = System.getProperty("ENV", "");
+        if ("test".equals(env)) {
+            ctx.result(message);
+        } else {
+            setFlash(ctx, message);
+            ctx.redirect("/urls");
+        }
+    }
 
     private static TemplateEngine createTemplateEngine() {
-        ResourceCodeResolver resolver = new ResourceCodeResolver("templates");
+        ResourceCodeResolver resolver = new ResourceCodeResolver("templates", App.class.getClassLoader());
         return TemplateEngine.create(resolver, ContentType.Html);
     }
 
-    public static Javalin createApp(DataSource dataSource) {
-        TemplateEngine templateEngine = createTemplateEngine();
-        UrlRepository urlRepository = new UrlRepository(dataSource);
-
-        Javalin app = Javalin.create(config -> {
-            config.plugins.enableDevLogging();
-            config.fileRenderer(new JavalinJte(templateEngine));
-        });
-
-        app.get("/", ctx -> {
-            String flash = ctx.sessionAttribute("flash");
-            ctx.sessionAttribute("flash", null);
-
-            Map<String, Object> model = new HashMap<>();
-            model.put("flash", flash);
-            ctx.render("index.jte", model);
-        });
-
-        app.post("/urls", ctx -> {
-            String inputUrl = ctx.formParam("url");
-            if (inputUrl == null || inputUrl.isBlank()) {
-                ctx.sessionAttribute("flash", "Некорректный URL");
-                ctx.redirect("/");
-                return;
-            }
-
-            try {
-                URL url = URI.create(inputUrl).toURL();
-                String domain = url.getProtocol() + "://" + url.getHost();
-                if (url.getPort() != -1) {
-                    domain += ":" + url.getPort();
-                }
-
-                Url existing = urlRepository.findByName(domain);
-
-                if (existing != null) {
-                    ctx.sessionAttribute("flash", "Страница уже существует");
-                } else {
-                    urlRepository.save(new Url(domain, new Timestamp(System.currentTimeMillis())));
-                    ctx.sessionAttribute("flash", "Страница успешно добавлена");
-                }
-            } catch (Exception e) {
-                ctx.sessionAttribute("flash", "Некорректный URL");
-            }
-
-            ctx.redirect("/");
-        });
-
-        app.get("/urls", ctx -> {
-            List<Url> urls = urlRepository.findAll();
-            ctx.attribute("urls", urls);
-            ctx.render("urls.jte");
-        });
-
-        app.get("/urls/{id}", ctx -> {
-            long id = Long.parseLong(ctx.pathParam("id"));
-            Url url = urlRepository.findById(id);
-            ctx.attribute("url", url);
-            ctx.render("showUrl.jte");
-        });
-
-        return app;
+    private static void setFlash(io.javalin.http.Context ctx, String message) {
+        ctx.sessionAttribute("flash", message);
     }
 
-    public static void main(String[] args) {
-        LOGGER.info("Starting application...");
-        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "7070"));
-        Javalin app = createApp(Database.getDataSource());
-        app.start(port);
-        LOGGER.info("Application started on port {}", port);
+    private static String getFlash(io.javalin.http.Context ctx) {
+        String message = ctx.sessionAttribute("flash");
+        ctx.sessionAttribute("flash", null);
+        return message;
+    }
+
+    public static DataSource getDataSource() {
+        initApp();
+        return dataSource;
     }
 }

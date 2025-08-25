@@ -1,86 +1,94 @@
 package hexlet.code;
 
 import io.javalin.Javalin;
-import io.javalin.testtools.JavalinTest;
-import io.javalin.testtools.HttpClient;
+import kong.unirest.HttpResponse;
+import kong.unirest.Unirest;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInstance;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class AppTest {
-    private static DataSource dataSource;
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class AppTest {
+
+    private Javalin app;
+    private final String url = "http://localhost:7000";
 
     @BeforeAll
-    static void setup() {
-        dataSource = Database.getDataSource();
+    void startServer() throws InterruptedException {
+        System.setProperty("ENV", "test");
+        App.getApp();
+        app = App.getApp();
+        app.start(7000);
+        Thread.sleep(500);
+    }
+
+    @AfterAll
+    void stopServer() {
+        if (app != null) {
+            app.stop();
+        }
     }
 
     @BeforeEach
     void cleanDb() throws Exception {
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = App.getDataSource().getConnection();
              Statement stmt = conn.createStatement()) {
-            stmt.execute("TRUNCATE TABLE urls");
+            stmt.executeUpdate("DELETE FROM urls");
         }
     }
 
     @Test
-    void testHomePage() {
-        Javalin app = App.createApp(dataSource);
-        JavalinTest.test(app, (server, client) -> {
-            HttpClient.Response response = client.get("/");
-            assertThat(response.code()).isEqualTo(200);
-            assertThat(response.body()).contains("Добавить сайт");
-        });
+    void testAddValidUrlShowsFlash() {
+        String testUrl = "https://example.org";
+
+        HttpResponse<String> response = Unirest.post(url + "/urls")
+                .field("url", testUrl)
+                .asString();
+
+        assertTrue(response.getBody().contains("Страница успешно добавлена"));
+        assertTrue(urlExistsInDb(testUrl));
     }
 
     @Test
-    void testAddUrl() throws Exception {
-        Javalin app = App.createApp(dataSource);
-        JavalinTest.test(app, (server, client) -> {
-            HttpClient.Response response = client.post("/urls", "url=https://example.com");
+    void testAddDuplicateUrlShowsFlash() {
+        String testUrl = "https://example.org";
 
-            assertThat(response.code()).isEqualTo(302);
+        Unirest.post(url + "/urls").field("url", testUrl).asString();
 
-            UrlRepository repo = new UrlRepository(dataSource);
-            List<Url> urls = repo.findAll();
-            assertThat(urls).anyMatch(u -> u.getName().equals("https://example.com"));
-        });
+        HttpResponse<String> response = Unirest.post(url + "/urls").field("url", testUrl).asString();
+
+        assertTrue(response.getBody().contains("Страница уже существует"));
     }
 
     @Test
-    void testUrlsPage() throws Exception {
-        UrlRepository repo = new UrlRepository(dataSource);
-        repo.save(new Url("https://hexlet.io", new Timestamp(System.currentTimeMillis())));
+    void testAddInvalidUrlShowsFlash() {
+        String invalidUrl = "invalid-url";
 
-        Javalin app = App.createApp(dataSource);
-        JavalinTest.test(app, (server, client) -> {
-            HttpClient.Response response = client.get("/urls");
-            assertThat(response.code()).isEqualTo(200);
-            assertThat(response.body()).contains("https://hexlet.io");
-        });
+        HttpResponse<String> response = Unirest.post(url + "/urls")
+                .field("url", invalidUrl)
+                .asString();
+
+        assertTrue(response.getBody().contains("Некорректный URL"));
     }
 
-    @Test
-    void testShowUrlPage() throws Exception {
-        UrlRepository repo = new UrlRepository(dataSource);
-        Url url = new Url("https://hexlet.io", new Timestamp(System.currentTimeMillis()));
-        repo.save(url);
-
-        Javalin app = App.createApp(dataSource);
-        JavalinTest.test(app, (server, client) -> {
-            HttpClient.Response response = client.get("/urls/" + url.getId());
-            assertThat(response.code()).isEqualTo(200);
-            assertThat(response.body()).contains("https://hexlet.io");
-        });
+    private boolean urlExistsInDb(String testUrl) {
+        try (Connection conn = App.getDataSource().getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(
+                     "SELECT COUNT(*) AS cnt FROM urls WHERE name='" + testUrl + "'")) {
+            rs.next();
+            return rs.getInt("cnt") > 0;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

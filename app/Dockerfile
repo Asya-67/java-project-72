@@ -17,10 +17,11 @@ COPY src ./src
 COPY config ./config
 
 # Собираем проект
-RUN ./gradlew build --no-daemon
+RUN ./gradlew clean build --no-daemon
 
-# Пробрасываем порт 7070
-EXPOSE 7070
+# Пробрасываем порт из переменной окружения или дефолт 7070
+ENV PORT 7070
+EXPOSE $PORT
 
 # Запуск приложения с нужным JAR
-CMD ["java", "-jar", "build/libs/app-1.0-SNAPSHOT-all.jar"]
+CMD ["sh", "-c", "java -jar build/libs/app-1.0-SNAPSHOT.jar --server.port=$PORT"]
