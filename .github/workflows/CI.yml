@@ -6,26 +6,31 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
+      # 1. Проверка кода
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # 2. Настройка JDK
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
+      # 3. Настройка Gradle
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      # 4. Кэширование Gradle
       - name: Cache Gradle packages
         uses: actions/cache@v4
         with:
@@ -36,6 +41,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle
 
+      # 5. Кэширование SonarCloud
       - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
@@ -43,19 +49,32 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
+      # 6. Разрешение прав на Gradle Wrapper
       - name: Grant permission to Gradle wrapper
         run: chmod +x app/gradlew
 
+      # 7. Checkstyle
+      - name: Run Checkstyle
+        working-directory: app
+        run: ./gradlew checkstyleMain --stacktrace
+
+      # 8. Сборка и тесты
       - name: Build and run tests
         working-directory: app
-        run: ./gradlew build
+        run: ./gradlew build --stacktrace
 
+      # 9. Генерация отчета по покрытию
       - name: Generate coverage report
         working-directory: app
-        run: ./gradlew jacocoTestReport
+        run: ./gradlew jacocoTestReport --stacktrace
 
+      # 10. SonarCloud анализ
       - name: SonarCloud Scan
         working-directory: app
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew sonar --info
+        run: ./gradlew sonarqube --info --stacktrace
+
+      # 11. Hexlet-check
+      - name: Hexlet Check
+        uses: hexlet-components/hexlet-check-action@v1
