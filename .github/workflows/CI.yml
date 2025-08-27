@@ -10,7 +10,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -46,19 +45,16 @@ jobs:
       - name: Grant permission to Gradle wrapper
         run: chmod +x app/gradlew
 
-      - name: Run Checkstyle
-        working-directory: app
-        run: ./gradlew checkstyleMain --stacktrace
-
       - name: Build and run tests
         working-directory: app
-        run: ./gradlew build --stacktrace
+        run: ./gradlew build
 
       - name: Generate coverage report
         working-directory: app
-        run: ./gradlew jacocoTestReport --stacktrace
+        run: ./gradlew jacocoTestReport
 
       - name: SonarCloud Scan
         working-directory: app
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew sonarqube -Dsonar.projectKey=Asya-67_java-project-72 -Dsonar.organization=asya-67-71 --info --stacktrace
