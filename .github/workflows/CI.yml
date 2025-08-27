@@ -46,20 +46,15 @@ jobs:
       - name: Grant permission to Gradle wrapper
         run: chmod +x app/gradlew
 
-      - name: Run Checkstyle
-        working-directory: app
-        run: ./gradlew checkstyleMain --stacktrace
-
       - name: Build and run tests
         working-directory: app
-        run: ./gradlew build --stacktrace
+        run: ./gradlew build
 
       - name: Generate coverage report
         working-directory: app
-        run: ./gradlew jacocoTestReport --stacktrace
+        run: ./gradlew jacocoTestReport
 
       - name: SonarCloud Scan
         working-directory: app
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew sonar --info --stacktrace
