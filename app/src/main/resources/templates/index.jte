@@ -1,3 +1,6 @@
+@import hexlet.code.AppPaths
+@params String flash
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,8 +10,13 @@
 </head>
 <body class="container mt-5">
     <h1>Добавьте URL</h1>
-    <form action="/urls" method="POST">
-        <input type="text" name="url" class="form-control mb-2" placeholder="https://example.com">
+
+    @if(flash != null)
+        <div class="alert alert-success">@flash</div>
+    @endif
+
+    <form action="${AppPaths.urls()}" method="POST">
+        <input type="text" name="url" class="form-control mb-2" placeholder="https://example.com" required>
         <button type="submit" class="btn btn-primary">Добавить</button>
     </form>
 </body>

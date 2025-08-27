@@ -6,6 +6,7 @@ plugins {
     id("org.sonarqube") version "6.2.0.5505"
     id("jacoco")
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("gg.jte.gradle") version "3.1.9"
 }
 
 import org.gradle.api.tasks.JavaExec
@@ -23,8 +24,7 @@ dependencies {
     implementation("io.javalin:javalin:5.6.3")
     implementation("io.javalin:javalin-rendering:5.6.3")
     implementation("gg.jte:jte:3.1.9")
-    implementation("gg.jte:jte-runtime:1.15.1")
-
+    implementation("gg.jte:jte-runtime:3.1.9")
     // SLF4J
     implementation("org.slf4j:slf4j-simple:2.0.16")
 
@@ -32,6 +32,8 @@ dependencies {
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("com.h2database:h2:2.2.224")
     implementation("org.postgresql:postgresql:42.7.3")
+    implementation("com.konghq:unirest-java:3.13.6")
+    implementation("org.jsoup:jsoup:1.16.1")
 
     // Тестирование
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
@@ -42,6 +44,14 @@ dependencies {
     testImplementation("com.squareup.okhttp3:okhttp:4.11.0")
     testImplementation("com.squareup.okhttp3:okhttp-urlconnection:4.11.0")
     testImplementation("com.konghq:unirest-java:3.13.6")
+
+
+    implementation("org.jsoup:jsoup:1.16.1")
+    compileOnly("org.projectlombok:lombok:1.18.30")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
 }
 
 jacoco {
@@ -88,6 +98,12 @@ tasks.withType<ShadowJar> {
     manifest {
         attributes["Main-Class"] = "hexlet.code.App"
     }
+}
+
+jte {
+    sourceDirectory.set(file("src/main/resources/templates").toPath())
+    targetDirectory.set(file("jte-classes").toPath())
+    trimControlStructures.set(true)
 }
 
 // Отключаем конфликтующие задачи
