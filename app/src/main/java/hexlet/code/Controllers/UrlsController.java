@@ -24,27 +24,30 @@ public class UrlsController {
     public static void showMainPage(Context ctx) {
         Base page = new Base();
         page.setFlash(Methods.getFlash(ctx));
+        page.setColor("info");
+        ctx.status(200);
         ctx.render("index.jte", Map.of("page", page));
     }
 
     public static void showUrlList(Context ctx) throws SQLException {
         List<Url> urls = URL_REPOSITORY.findAll();
 
-        Map<Url, UrlCheck> urlsWithChecks = urls.stream()
+        Map<Url, UrlCheck> urlsWithLastChecks = urls.stream()
                 .collect(Collectors.toMap(
                         u -> u,
                         u -> {
                             try {
-                                List<UrlCheck> checks = CHECK_REPOSITORY.findByUrlId(u.getId());
-                                return checks.isEmpty() ? null : checks.get(checks.size() - 1);
+                                return CHECK_REPOSITORY.findLastCheckByUrlId(u.getId()).orElse(null);
                             } catch (SQLException e) {
                                 return null;
                             }
                         }
                 ));
 
-        UrlsDto page = new UrlsDto(urlsWithChecks);
+        UrlsDto page = new UrlsDto(urlsWithLastChecks);
         page.setFlash(Methods.getFlash(ctx));
+        page.setColor("info");
+        ctx.status(200);
         ctx.render("urls.jte", Map.of("page", page));
     }
 
@@ -62,6 +65,8 @@ public class UrlsController {
 
         UrlDto page = new UrlDto(url, checks);
         page.setFlash(Methods.getFlash(ctx));
+        page.setColor("info");
+        ctx.status(200);
         ctx.render("url.jte", Map.of("page", page));
     }
 
@@ -72,6 +77,7 @@ public class UrlsController {
         if (inputUrl == null || inputUrl.isBlank()) {
             page.setFlash("Добавьте URL");
             page.setColor("danger");
+            ctx.status(200);
             ctx.render("index.jte", Map.of("page", page));
             return;
         }
@@ -87,6 +93,7 @@ public class UrlsController {
         } catch (Exception e) {
             page.setFlash("Некорректный URL");
             page.setColor("danger");
+            ctx.status(200);
             ctx.render("index.jte", Map.of("page", page));
             return;
         }
@@ -95,6 +102,7 @@ public class UrlsController {
             if (URL_REPOSITORY.exists(baseUrl)) {
                 page.setFlash("Страница уже существует");
                 page.setColor("warning");
+                ctx.status(200);
                 ctx.render("index.jte", Map.of("page", page));
                 return;
             }
