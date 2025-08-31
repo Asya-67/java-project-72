@@ -1,35 +1,23 @@
 @import hexlet.code.dto.Base
-@content index(Base page) {
-    @commonsite(content, page) {
-        <div class="container-fluid bg-dark p-5">
-            <div class="row">
-                <div class="col-md-10 col-lg-8 mx-auto text-white">
-                    <h1 class="display-3 mb-0">Добавьте URL</h1>
+@param Base page = null
 
-                    @if(page != null && page.getFlash() != null)
-                        <div class="alert alert-${page.getColor()} mt-3">
-                            ${page.getFlash()}
-                        </div>
-                    @endif
+@@extends("layout.jte")
+@section content {
+    <div class="container mt-4">
+        <h1>Page Analyzer</h1>
 
-                    <form action="/urls" method="post" class="rss-form text-body mt-3">
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-floating">
-                                    <input id="url-input" autofocus type="text" required name="url"
-                                           class="form-control w-100" placeholder="ссылка" autocomplete="off">
-                                    <label for="url-input">Ссылка</label>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <button type="submit" class="h-100 btn btn-lg btn-primary px-sm-5">Проверить</button>
-                            </div>
-                        </div>
-                    </form>
-
-                    <p class="mt-2 mb-0 text-muted">Пример: https://www.example.com</p>
-                </div>
+        @if(page != null && page.getFlash() != null)
+            <div class="alert alert-${page.getColor()} alert-dismissible fade show" role="alert">
+                ${page.getFlash()}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        </div>
-    }
+        @endif
+
+        <form method="post" action="/urls" class="mt-3">
+            <div class="mb-3">
+                <input type="text" name="url" class="form-control" placeholder="Введите URL">
+            </div>
+            <button type="submit" class="btn btn-primary">Добавить</button>
+        </form>
+    </div>
 }

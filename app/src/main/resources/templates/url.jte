@@ -1,23 +1,40 @@
-@import hexlet.code.dto.Base
-@import hexlet.code.Methods
-@content url(Base page) {
-    @commonsite(content, page) {
-        <div class="container mt-5">
-            <h1>${page.getUrl().getName()}</h1>
-            <p>Добавлен: ${Methods.timeFormat(page.getUrl().getCreatedAt())}</p>
+@import hexlet.code.dto.UrlDto
+@param UrlDto page = null
 
-            <h2>Проверки</h2>
-            <ul class="list-group">
-                {{ for (var check : page.getUrlChecks()) { }}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>
-                            Дата: ${Methods.timeFormat(check.getCreatedAt())},
-                            Статус: ${check.getStatusCode()}
-                        </span>
-                        <a href="/urls/${page.getUrl().getId()}/checks" class="btn btn-sm btn-primary ms-2">Проверить снова</a>
-                    </li>
-                {{ } }}
-            </ul>
-        </div>
-    }
+@extends("layout.jte")
+@section content {
+    <div class="container mt-4">
+        <h1>Страница: ${page.getUrl().getName()}</h1>
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Status Code</th>
+                    <th>Title</th>
+                    <th>H1</th>
+                    <th>Description</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if(page.getChecks() != null && !page.getChecks().isEmpty())
+                    @for(check : page.getChecks())
+                        <tr>
+                            <td>${check.getId()}</td>
+                            <td>${check.getStatusCode()}</td>
+                            <td>${check.getTitle()}</td>
+                            <td>${check.getH1()}</td>
+                            <td>${check.getDescription()}</td>
+                            <td>${check.getCreatedAt()}</td>
+                        </tr>
+                    @endfor
+                @else
+                    <tr>
+                        <td colspan="6" class="text-center">Проверки отсутствуют</td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
+        <a href="/urls" class="btn btn-secondary mt-3">Назад к списку URL</a>
+    </div>
 }

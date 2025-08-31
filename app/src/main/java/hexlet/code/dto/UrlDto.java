@@ -2,14 +2,23 @@ package hexlet.code.dto;
 
 import hexlet.code.models.Url;
 import hexlet.code.models.UrlCheck;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 import java.util.List;
 
-@AllArgsConstructor
-@Getter
 public class UrlDto extends Base {
     private Url url;
-    private List<UrlCheck> urlChecks;
+    private List<UrlCheck> checks;
+
+    public UrlDto(Url url, List<UrlCheck> checks) {
+        this.url = url;
+        this.checks = checks;
+    }
+
+    public Url getUrl() {
+        return url;
+    }
+
+    public List<UrlCheck> getChecks() {
+        return checks;
+    }
 }

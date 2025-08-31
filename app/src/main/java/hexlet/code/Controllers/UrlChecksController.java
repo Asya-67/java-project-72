@@ -26,7 +26,7 @@ public class UrlChecksController {
         try {
             url = URL_REPOSITORY.findById(urlId).orElse(null);
         } catch (SQLException e) {
-            Methods.handleFlash(ctx, "Ошибка при получении сайта из базы данных");
+            Methods.handleFlash(ctx, "Ошибка при получении сайта из базы данных", "danger");
             ctx.redirect("/urls/" + urlId);
             return;
         }
@@ -51,11 +51,11 @@ public class UrlChecksController {
 
             CHECK_REPOSITORY.save(check);
 
-            Methods.handleFlash(ctx, "Проверка успешно добавлена");
+            Methods.handleFlash(ctx, "Проверка успешно добавлена", "success");
             ctx.redirect("/urls/" + urlId);
 
         } catch (Exception e) {
-            Methods.handleFlash(ctx, "Ошибка при проверке сайта");
+            Methods.handleFlash(ctx, "Ошибка при проверке сайта", "danger");
             ctx.redirect("/urls/" + urlId);
         }
     }

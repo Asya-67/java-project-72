@@ -23,7 +23,8 @@ public class UrlsController {
 
     public static void showMainPage(Context ctx) {
         Base page = new Base();
-        page.setFlash(Methods.getFlash(ctx));
+        String flash = Methods.getFlash(ctx);
+        page.setFlash(flash != null ? flash : "Добавьте URL");
         page.setColor("info");
         ctx.status(200);
         ctx.render("index.jte", Map.of("page", page));
@@ -31,7 +32,6 @@ public class UrlsController {
 
     public static void showUrlList(Context ctx) throws SQLException {
         List<Url> urls = URL_REPOSITORY.findAll();
-
         Map<Url, UrlCheck> urlsWithLastChecks = urls.stream()
                 .collect(Collectors.toMap(
                         u -> u,
@@ -72,9 +72,9 @@ public class UrlsController {
 
     public static void createUrl(Context ctx) {
         String inputUrl = ctx.formParam("url");
-        Base page = new Base();
 
         if (inputUrl == null || inputUrl.isBlank()) {
+            Base page = new Base();
             page.setFlash("Добавьте URL");
             page.setColor("danger");
             ctx.status(200);
@@ -91,6 +91,7 @@ public class UrlsController {
                 baseUrl += ":" + url.getPort();
             }
         } catch (Exception e) {
+            Base page = new Base();
             page.setFlash("Некорректный URL");
             page.setColor("danger");
             ctx.status(200);
@@ -100,6 +101,7 @@ public class UrlsController {
 
         try {
             if (URL_REPOSITORY.exists(baseUrl)) {
+                Base page = new Base();
                 page.setFlash("Страница уже существует");
                 page.setColor("warning");
                 ctx.status(200);
@@ -110,8 +112,7 @@ public class UrlsController {
             Url url = new Url(baseUrl);
             URL_REPOSITORY.save(url);
 
-            page.setFlash("Страница успешно добавлена");
-            page.setColor("success");
+            Methods.handleFlash(ctx, "Страница успешно добавлена", "success");
             ctx.redirect("/urls/" + url.getId());
 
         } catch (SQLException e) {
