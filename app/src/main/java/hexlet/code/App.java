@@ -24,10 +24,14 @@ public class App {
         DbInitializer.init(dataSource);
         BaseRepository.initDataSource(dataSource);
 
-        var app = Javalin.create(config -> config.plugins.enableDevLogging());
+        Javalin app = Javalin.create(config -> {
+
+            config.enableDevLogging();
+            config.enableRouteOverview("/routes");
+        });
+
         JavalinJte.init(Methods.createTemplateEngine());
 
-        // Исправлено: вызов актуальных методов AppPaths
         app.get(AppPaths.mainPath(), UrlsController::showMainPage);
         app.get(AppPaths.urlsPath(), UrlsController::showUrlList);
         app.post(AppPaths.urlsPath(), UrlsController::createUrl);
@@ -45,7 +49,7 @@ public class App {
      * @throws SQLException если не удалось подключиться к базе данных.
      */
     public static void main(String[] args) throws SQLException {
-        var app = getApp();
+        Javalin app = getApp();
         app.start(7000);
     }
 
