@@ -1,23 +1,24 @@
-@import hexlet.code.AppPaths
-@params String flash
-
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Главная</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="container mt-5">
-    <h1>Добавьте URL</h1>
-
-    @if(flash != null)
-        <div class="alert alert-success">@flash</div>
-    @endif
-
-    <form action="${AppPaths.urls()}" method="POST">
-        <input type="text" name="url" class="form-control mb-2" placeholder="https://example.com" required>
-        <button type="submit" class="btn btn-primary">Добавить</button>
-    </form>
-</body>
-</html>
+@content commonsite(content, page) {
+    <div class="container-fluid bg-dark p-5">
+        <div class="row">
+            <div class="col-md-10 col-lg-8 mx-auto text-white">
+                <h1 class="display-3 mb-0">Добавьте URL</h1>
+                <form action="/urls" method="post" class="rss-form text-body">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating">
+                                <input id="url-input" autofocus type="text" required name="url"
+                                       aria-label="url" class="form-control w-100" placeholder="cсылка" autocomplete="off">
+                                <label for="url-input">Ссылка</label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="h-100 btn btn-lg btn-primary px-sm-5">Проверить</button>
+                        </div>
+                    </div>
+                </form>
+                <p class="mt-2 mb-0 text-muted">Пример: https://www.example.com</p>
+            </div>
+        </div>
+    </div>
+}

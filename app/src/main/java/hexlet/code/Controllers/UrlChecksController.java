@@ -26,8 +26,8 @@ public class UrlChecksController {
         try {
             url = URL_REPOSITORY.findById(urlId).orElse(null);
         } catch (SQLException e) {
-            e.printStackTrace();
             Methods.handleFlash(ctx, "Ошибка при получении сайта из базы данных");
+            ctx.redirect("/urls/" + urlId);
             return;
         }
 
@@ -38,7 +38,6 @@ public class UrlChecksController {
 
         try {
             HttpResponse<String> response = Unirest.get(url.getName()).asString();
-
             Document doc = Jsoup.parse(response.getBody());
 
             UrlCheck check = new UrlCheck();
@@ -53,9 +52,11 @@ public class UrlChecksController {
             CHECK_REPOSITORY.save(check);
 
             Methods.handleFlash(ctx, "Проверка успешно добавлена");
+            ctx.redirect("/urls/" + urlId);
+
         } catch (Exception e) {
-            e.printStackTrace();
             Methods.handleFlash(ctx, "Ошибка при проверке сайта");
+            ctx.redirect("/urls/" + urlId);
         }
     }
 }

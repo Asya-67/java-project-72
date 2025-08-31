@@ -2,18 +2,17 @@ DROP TABLE IF EXISTS url_checks;
 DROP TABLE IF EXISTS urls;
 
 CREATE TABLE urls (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE url_checks (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    url_id BIGINT NOT NULL,
-    status_code INT,
-    title TEXT,
-    h1 TEXT,
+    id SERIAL PRIMARY KEY,
+    status_code INTEGER NOT NULL,
+    title VARCHAR(255),
+    h1 VARCHAR(255),
     description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_url FOREIGN KEY (url_id) REFERENCES urls(id) ON DELETE CASCADE
+    url_id INTEGER REFERENCES urls (id),
+    created_at TIMESTAMP NOT NULL
 );

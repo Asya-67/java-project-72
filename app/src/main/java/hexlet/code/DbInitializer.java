@@ -42,7 +42,6 @@ public class DbInitializer {
     public static void init(DataSource dataSource) {
         try (Connection conn = dataSource.getConnection()) {
             executeSqlFile(conn, "schema.sql");
-            executeSqlFile(conn, "data.sql");
         } catch (SQLException | IOException e) {
             throw new RuntimeException("Failed to initialize database", e);
         }

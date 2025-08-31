@@ -27,9 +27,10 @@ public class App {
         var app = Javalin.create(config -> config.plugins.enableDevLogging());
         JavalinJte.init(Methods.createTemplateEngine());
 
-        app.get(AppPaths.root(), UrlsController::showMainPage);
-        app.get(AppPaths.urls(), UrlsController::showUrlList);
-        app.post(AppPaths.urls(), UrlsController::createUrl);
+        // Исправлено: вызов актуальных методов AppPaths
+        app.get(AppPaths.mainPath(), UrlsController::showMainPage);
+        app.get(AppPaths.urlsPath(), UrlsController::showUrlList);
+        app.post(AppPaths.urlsPath(), UrlsController::createUrl);
 
         app.get(AppPaths.url("{id}"), UrlsController::showUrl);
         app.post(AppPaths.urlChecks("{id}"), UrlChecksController::makeCheck);

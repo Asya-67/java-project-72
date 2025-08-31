@@ -4,20 +4,23 @@ import hexlet.code.models.Url;
 import hexlet.code.models.UrlCheck;
 import hexlet.code.repository.UrlRepository;
 import hexlet.code.repository.UrlCheckRepository;
-import io.javalin.Javalin;
-
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.AfterAll;
-
-import org.junit.jupiter.api.TestInstance;
-import org.h2.jdbcx.JdbcDataSource;
-import kong.unirest.Unirest;
-import kong.unirest.HttpResponse;
 import hexlet.code.repository.BaseRepository;
 
+import io.javalin.Javalin;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+
+import org.h2.jdbcx.JdbcDataSource;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
+
+import kong.unirest.HttpResponse;
+import kong.unirest.Unirest;
+
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -30,28 +33,31 @@ public class AppIntegrationTest {
     private String baseUrl;
     private MockWebServer mockWebServer;
 
+    private UrlRepository urlRepository;
+    private UrlCheckRepository urlCheckRepository;
+
     @BeforeAll
-    void beforeAll() {
+    void beforeAll() throws SQLException, IOException {
         System.setProperty("ENV", "test");
 
-        try {
-            JdbcDataSource ds = new JdbcDataSource();
-            ds.setURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
-            ds.setUser("sa");
-            ds.setPassword("");
+        mockWebServer = new MockWebServer();
+        mockWebServer.start();
 
-            DbInitializer.init(ds);
-            BaseRepository.initDataSource(ds);
+        JdbcDataSource ds = new JdbcDataSource();
+        ds.setURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
+        ds.setUser("sa");
+        ds.setPassword("");
 
-            app = App.getApp();
-            app.start(0);
-            baseUrl = "http://localhost:" + app.port();
+        DbInitializer.init(ds);
+        BaseRepository.initDataSource(ds);
 
-            mockWebServer = new MockWebServer();
+        urlRepository = new UrlRepository();
+        urlCheckRepository = new UrlCheckRepository();
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        app = App.getApp();
+        app.start(0);
+
+        baseUrl = "http://localhost:" + app.port();
     }
 
     @AfterAll
@@ -59,6 +65,20 @@ public class AppIntegrationTest {
         app.stop();
         if (mockWebServer != null) {
             mockWebServer.shutdown();
+        }
+    }
+
+    @BeforeEach
+    void beforeEach() throws SQLException {
+        try (var conn = BaseRepository.getDataSource().getConnection();
+             var stmt = conn.createStatement()) {
+
+            stmt.executeUpdate("SET REFERENTIAL_INTEGRITY FALSE");
+
+            stmt.executeUpdate("TRUNCATE TABLE url_checks");
+            stmt.executeUpdate("TRUNCATE TABLE urls");
+
+            stmt.executeUpdate("SET REFERENTIAL_INTEGRITY TRUE");
         }
     }
 
@@ -77,7 +97,7 @@ public class AppIntegrationTest {
                 .asString();
         assertThat(response.getStatus()).isEqualTo(302);
 
-        List<Url> urls = new UrlRepository().findAll();
+        List<Url> urls = urlRepository.findAll();
         assertThat(urls).extracting(Url::getName).contains(url);
     }
 
@@ -92,8 +112,9 @@ public class AppIntegrationTest {
 
     @Test
     void testUrlsListAndShowUrl() throws SQLException {
-        UrlRepository urlsRepo = new UrlRepository();
-        List<Url> urls = urlsRepo.findAll();
+        Url url = urlRepository.save(new Url("https://example.org"));
+
+        List<Url> urls = urlRepository.findAll();
         assertThat(urls).isNotEmpty();
 
         Long id = urls.get(0).getId();
@@ -108,18 +129,15 @@ public class AppIntegrationTest {
                 + "<meta name='description' content='My Description'></head>"
                 + "<body><h1>My H1</h1></body></html>";
         mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(html));
-        mockWebServer.start();
         String testUrl = mockWebServer.url("/").toString();
 
-        UrlRepository urlRepo = new UrlRepository();
-        Url savedUrl = urlRepo.save(new Url(testUrl));
+        Url savedUrl = urlRepository.save(new Url(testUrl));
 
-        HttpResponse<String> response = Unirest.post(baseUrl + "/urls/" + savedUrl.getId()
-                + "/checks").asString();
+        HttpResponse<String> response = Unirest.post(baseUrl + "/urls/" + savedUrl.getId() + "/checks")
+                .asString();
         assertThat(response.getStatus()).isEqualTo(302);
 
-        UrlCheckRepository checkRepo = new UrlCheckRepository();
-        List<UrlCheck> checks = checkRepo.findByUrlId(savedUrl.getId());
+        List<UrlCheck> checks = urlCheckRepository.findByUrlId(savedUrl.getId());
         assertThat(checks).isNotEmpty();
 
         UrlCheck check = checks.get(0);

@@ -15,12 +15,11 @@ public class UrlRepository extends BaseRepository {
 
     public Url save(Url url) throws SQLException {
         String sql = "INSERT INTO urls (name, created_at) VALUES (?, ?)";
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, url.getName());
             ps.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
-
             ps.executeUpdate();
 
             try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -35,7 +34,7 @@ public class UrlRepository extends BaseRepository {
     public List<Url> findAll() throws SQLException {
         String sql = "SELECT * FROM urls ORDER BY id";
         List<Url> urls = new ArrayList<>();
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
@@ -51,9 +50,8 @@ public class UrlRepository extends BaseRepository {
 
     public Optional<Url> findById(Long id) throws SQLException {
         String sql = "SELECT * FROM urls WHERE id = ?";
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -69,9 +67,8 @@ public class UrlRepository extends BaseRepository {
 
     public boolean exists(String name) throws SQLException {
         String sql = "SELECT COUNT(*) FROM urls WHERE name = ?";
-        try (Connection conn = dataSource.getConnection();
+        try (Connection conn = getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, name);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
