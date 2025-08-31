@@ -7,6 +7,7 @@ plugins {
     jacoco
     checkstyle
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("org.sonarqube") version "6.2.0.5505"
 }
 
 group = "hexlet.code"
@@ -14,6 +15,14 @@ version = "1.0-SNAPSHOT"
 
 application {
     mainClass.set("hexlet.code.App")
+}
+
+sonar {
+    properties {
+        property ("sonar.projectKey", "Asya-67_java-project-72")
+        property ("sonar.organization", "asya-67-71")
+        property ("sonar.host.url", "https://sonarcloud.io")
+    }
 }
 
 repositories {
