@@ -1,21 +1,15 @@
-@content commonsite(content, page) {
+@content index(page) {
     <div class="container-fluid bg-dark p-5">
         <div class="row">
             <div class="col-md-10 col-lg-8 mx-auto text-white">
                 <h1 class="display-3 mb-0">Добавьте URL</h1>
 
-                @if(page != null && page.getFlash() != null)
-                    <div class="alert alert-${page.getColor()} mt-3">
-                        ${page.getFlash()}
-                    </div>
-                @endif
-
-                <form action="/urls" method="post" class="rss-form text-body">
+                <form action="/urls" method="post" class="rss-form text-body mt-3">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating">
                                 <input id="url-input" autofocus type="text" required name="url"
-                                       aria-label="url" class="form-control w-100" placeholder="cсылка" autocomplete="off">
+                                       class="form-control w-100" placeholder="ссылка" autocomplete="off">
                                 <label for="url-input">Ссылка</label>
                             </div>
                         </div>

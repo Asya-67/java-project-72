@@ -62,7 +62,7 @@ public class UrlsController {
 
         UrlDto page = new UrlDto(url, checks);
         page.setFlash(Methods.getFlash(ctx));
-        ctx.render("url.jte", Map.of("page", page, "url", url, "checks", checks));
+        ctx.render("url.jte", Map.of("page", page));
     }
 
     public static void createUrl(Context ctx) {

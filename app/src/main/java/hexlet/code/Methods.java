@@ -18,20 +18,23 @@ public class Methods {
     }
 
     public static String getJdbcUrl() {
-        return System.getenv().getOrDefault("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;");
+        return System.getenv().getOrDefault(
+                "JDBC_DATABASE_URL",
+                "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;"
+        );
     }
 
     public static int getPort() {
         return Integer.parseInt(System.getenv().getOrDefault("PORT", "7000"));
     }
 
+    public static void handleFlash(Context ctx, String message, String redirectPath) {
+        setFlash(ctx, message);
+        ctx.redirect(redirectPath);
+    }
+
     public static void handleFlash(Context ctx, String message) {
-        if ("test".equals(System.getProperty("ENV"))) {
-            ctx.result(message);
-        } else {
-            setFlash(ctx, message);
-            ctx.redirect("/urls");
-        }
+        handleFlash(ctx, message, "/urls");
     }
 
     public static void setFlash(Context ctx, String message) {
