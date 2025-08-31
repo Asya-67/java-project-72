@@ -1,27 +1,34 @@
-FROM openjdk:22-jdk-slim
+# Этап сборки
+FROM openjdk:22-jdk-slim AS builder
 
 WORKDIR /app
 
-# Копируем Gradle wrapper и папку gradle
+# Копируем gradle wrapper и конфиги
 COPY gradlew .
 COPY gradle ./gradle
-
-# Копируем Gradle Kotlin DSL файлы
 COPY build.gradle.kts .
 COPY settings.gradle.kts .
 
 RUN chmod +x gradlew
 
-# Копируем исходный код и конфигурацию Checkstyle
+# Копируем исходники и конфиг
 COPY src ./src
 COPY config ./config
 
-# Собираем shadowJar вместо обычного build
-RUN ./gradlew clean shadowJar --no-daemon
+# Собираем shadowJar, без тестов
+RUN ./gradlew clean shadowJar --no-daemon -x test
 
-# Пробрасываем порт из переменной окружения или дефолт 7070
-ENV PORT 7070
+# Этап продакшена
+FROM openjdk:22-jre-slim
+
+WORKDIR /app
+
+# Копируем готовый jar из этапа сборки
+COPY --from=builder /app/build/libs/app-1.0-SNAPSHOT-all.jar ./app.jar
+
+# Порт приложения
+ENV PORT=7000
 EXPOSE $PORT
 
-# Запуск приложения через shadowJar
-CMD ["sh", "-c", "java -jar build/libs/app-1.0-SNAPSHOT.jar --server.port=$PORT"]
+# Команда запуска
+CMD ["java", "-jar", "app.jar"]
