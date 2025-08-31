@@ -3,6 +3,13 @@
         <div class="row">
             <div class="col-md-10 col-lg-8 mx-auto text-white">
                 <h1 class="display-3 mb-0">Добавьте URL</h1>
+
+                @if(page != null && page.getFlash() != null)
+                    <div class="alert alert-${page.getColor()} mt-3">
+                        ${page.getFlash()}
+                    </div>
+                @endif
+
                 <form action="/urls" method="post" class="rss-form text-body">
                     <div class="row">
                         <div class="col">
