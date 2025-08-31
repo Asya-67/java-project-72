@@ -21,8 +21,8 @@ public class App {
         BaseRepository.initDataSource(dataSource);
 
         Javalin app = Javalin.create(config -> {
-            config.registerPlugin(new DevLoggingPlugin());
-            config.registerPlugin(new RouteOverviewPlugin("/routes"));
+            config.plugins.register(new DevLoggingPlugin());
+            config.plugins.register(new RouteOverviewPlugin("/routes"));
         });
 
         JavalinJte.init(Methods.createTemplateEngine());
