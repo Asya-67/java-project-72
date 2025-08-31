@@ -5,6 +5,8 @@ import hexlet.code.controllers.UrlChecksController;
 import hexlet.code.repository.BaseRepository;
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
+import io.javalin.plugin.bundled.DevLoggingPlugin;
+import io.javalin.plugin.bundled.RouteOverviewPlugin;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -13,20 +15,14 @@ public class App {
 
     private static DataSource dataSource;
 
-    /**
-     * Создаёт экземпляр Javalin приложения.
-     *
-     * @return объект Javalin приложения.
-     * @throws SQLException если не удалось подключиться к базе данных.
-     */
     public static Javalin getApp() throws SQLException {
         dataSource = Database.getDataSource();
         DbInitializer.init(dataSource);
         BaseRepository.initDataSource(dataSource);
 
         Javalin app = Javalin.create(config -> {
-            config.plugins.register(new io.javalin.plugin.bundled.DevLoggingPlugin());
-            config.plugins.register(new io.javalin.plugin.bundled.RouteOverviewPlugin("/routes"));
+            config.registerPlugin(new DevLoggingPlugin());
+            config.registerPlugin(new RouteOverviewPlugin("/routes"));
         });
 
         JavalinJte.init(Methods.createTemplateEngine());
@@ -41,35 +37,17 @@ public class App {
         return app;
     }
 
-    /**
-     * Точка входа в приложение.
-     *
-     * @param args аргументы командной строки.
-     * @throws SQLException если не удалось подключиться к базе данных.
-     */
     public static void main(String[] args) throws SQLException {
         Javalin app = getApp();
         app.start(7000);
     }
 
-    /**
-     * Запускает приложение Javalin на указанном порту (для тестов).
-     *
-     * @param port порт, на котором будет запущен сервер.
-     * @return объект Javalin приложения.
-     * @throws SQLException если не удалось подключиться к базе данных.
-     */
     public static Javalin startAppForTests(int port) throws SQLException {
         Javalin app = getApp();
         app.start(port);
         return app;
     }
 
-    /**
-     * Получение DataSource приложения.
-     *
-     * @return объект DataSource.
-     */
     public static DataSource getDataSource() {
         return dataSource;
     }
