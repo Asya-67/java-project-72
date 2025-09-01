@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 public class UrlChecksController {
-
     public static void makeCheck(Context ctx) {
         Long urlId = ctx.pathParamAsClass("id", Long.class).get();
 
@@ -23,8 +22,7 @@ public class UrlChecksController {
         try {
             url = UrlRepository.findById(urlId).orElse(null);
         } catch (SQLException e) {
-            Methods.handleFlash(ctx, "Ошибка при получении сайта из базы данных", "danger");
-            ctx.redirect("/urls/" + urlId);
+            Methods.handleFlash(ctx, "Ошибка при получении сайта из базы данных", "danger", "/urls/" + urlId);
             return;
         }
 
@@ -34,6 +32,7 @@ public class UrlChecksController {
         }
 
         try {
+
             HttpResponse<String> response = Unirest.get(url.getName()).asString();
 
             int statusCode = response.getStatus();
@@ -41,21 +40,11 @@ public class UrlChecksController {
 
             Document doc = Jsoup.parse(body);
 
-            String title = "";
-            String h1 = "";
-            String description = "";
-
-            if (doc.selectFirst("title") != null) {
-                title = doc.selectFirst("title").text();
-            }
-
-            if (doc.selectFirst("h1") != null) {
-                h1 = doc.selectFirst("h1").text();
-            }
-
-            if (doc.selectFirst("meta[name=description]") != null) {
-                description = doc.selectFirst("meta[name=description]").attr("content");
-            }
+            String title = doc.selectFirst("title") != null ? doc.selectFirst("title").text() : "";
+            String h1 = doc.selectFirst("h1") != null ? doc.selectFirst("h1").text() : "";
+            String description = doc.selectFirst("meta[name=description]") != null
+                    ? doc.selectFirst("meta[name=description]").attr("content")
+                    : "";
 
             UrlCheck check = new UrlCheck();
             check.setUrlId(urlId);
@@ -65,14 +54,15 @@ public class UrlChecksController {
             check.setDescription(description);
             check.setCreatedAt(Methods.toTimestamp(LocalDateTime.now()));
 
-            UrlCheckRepository.save(check);
+            UrlCheck savedCheck = UrlCheckRepository.save(check);
+            if (savedCheck.getId() == null) {
+                throw new RuntimeException("Ошибка сохранения проверки URL");
+            }
 
-            Methods.handleFlash(ctx, "Проверка успешно добавлена", "success");
-            ctx.redirect("/urls/" + urlId);
+            Methods.handleFlash(ctx, "Проверка успешно добавлена", "success", "/urls/" + urlId);
 
         } catch (Exception e) {
-            Methods.handleFlash(ctx, "Ошибка при проверке сайта", "danger");
-            ctx.redirect("/urls/" + urlId);
+            Methods.handleFlash(ctx, "Ошибка при проверке сайта", "danger", "/urls/" + urlId);
         }
     }
 }

@@ -70,8 +70,13 @@ public class UrlsController {
     public static void createUrl(Context ctx) {
         String inputUrl = ctx.formParam("url");
 
+        Base page = new Base();
+        page.setColor("danger");
+
         if (inputUrl == null || inputUrl.isBlank()) {
-            Methods.handleFlash(ctx, "Добавьте URL", "danger", "/");
+            page.setFlash("Добавьте URL");
+            ctx.status(200);
+            ctx.render("index.jte", Map.of("page", page));
             return;
         }
 
@@ -84,7 +89,9 @@ public class UrlsController {
                 baseUrl += ":" + url.getPort();
             }
         } catch (Exception e) {
-            Methods.handleFlash(ctx, "Некорректный URL", "danger", "/");
+            page.setFlash("Некорректный URL");
+            ctx.status(200);
+            ctx.render("index.jte", Map.of("page", page));
             return;
         }
 
