@@ -13,19 +13,17 @@ public class App {
     private static DataSource dataSource;
 
     public static Javalin getApp() throws SQLException {
-        // Инициализация базы данных
         dataSource = Database.getDataSource();
         DbInitializer.init(dataSource);
         BaseRepository.initDataSource(dataSource);
 
-        // Создание Javalin
         Javalin app = Javalin.create(config -> {
             config.bundledPlugins.enableDevLogging();
             config.bundledPlugins.enableRouteOverview("/routes");
             config.fileRenderer(new JavalinJte(Methods.createTemplateEngine()));
         });
 
-        // Роуты
+
         app.get(AppPaths.mainPath(), UrlsController::showMainPage);
         app.get(AppPaths.urlsPath(), UrlsController::showUrlList);
         app.post(AppPaths.urlsPath(), UrlsController::createUrl);
@@ -38,7 +36,7 @@ public class App {
 
     public static void main(String[] args) throws SQLException {
         Javalin app = getApp();
-        app.start(Methods.getPort()); // Используем метод для порта
+        app.start(Methods.getPort());
     }
 
     public static Javalin startAppForTests(int port) throws SQLException {

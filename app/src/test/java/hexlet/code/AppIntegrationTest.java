@@ -125,6 +125,7 @@ public class AppIntegrationTest {
 
     @Test
     void testUrlCheckWithSeo() throws Exception {
+
         String html = "<html><head><title>My Title</title>"
                 + "<meta name='description' content='My Description'></head>"
                 + "<body><h1>My H1</h1></body></html>";
@@ -135,6 +136,7 @@ public class AppIntegrationTest {
 
         HttpResponse<String> response = Unirest.post(baseUrl + "/urls/" + savedUrl.getId() + "/checks")
                 .asString();
+
         assertThat(response.getStatus()).isEqualTo(302);
 
         List<UrlCheck> checks = urlCheckRepository.findByUrlId(savedUrl.getId());
@@ -144,5 +146,7 @@ public class AppIntegrationTest {
         assertThat(check.getTitle()).isEqualTo("My Title");
         assertThat(check.getH1()).isEqualTo("My H1");
         assertThat(check.getDescription()).isEqualTo("My Description");
+        assertThat(check.getStatusCode()).isEqualTo(200);
+        assertThat(check.getCreatedAt()).isNotNull();
     }
 }

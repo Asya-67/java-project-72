@@ -1,9 +1,11 @@
+# ======================
 # Этап сборки
+# ======================
 FROM eclipse-temurin:22-jdk AS builder
 
 WORKDIR /app
 
-# Копируем gradle wrapper и конфиги
+# Копируем Gradle wrapper и конфиги
 COPY gradlew .
 COPY gradle ./gradle
 COPY build.gradle.kts .
@@ -18,7 +20,9 @@ COPY config ./config
 # Собираем shadowJar без тестов
 RUN ./gradlew clean shadowJar --no-daemon
 
+# ======================
 # Этап продакшена
+# ======================
 FROM eclipse-temurin:22-jdk
 
 WORKDIR /app
@@ -26,12 +30,12 @@ WORKDIR /app
 # Копируем готовый jar из этапа сборки
 COPY --from=builder /app/build/libs/app-1.0-SNAPSHOT-all.jar ./app.jar
 
-# Порт приложения
+# Устанавливаем порт приложения
 ENV PORT=7000
 EXPOSE $PORT
 
-# Устанавливаем рабочую директории
-# COPY src/main/resources ./resources
+# Профиль Spring по умолчанию — prod
+ENV SPRING_PROFILES_ACTIVE=prod
 
-# Команда запуска
-CMD ["java", "-jar", "app.jar"]
+# Команда запуска с использованием профиля
+CMD ["java", "-jar", "app.jar", "--spring.profiles.active=${SPRING_PROFILES_ACTIVE}"]

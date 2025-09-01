@@ -50,6 +50,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("io.javalin:javalin-testtools:6.1.3")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
+    testImplementation("com.konghq:unirest-java:3.13.6")
 }
 
 tasks.test {
