@@ -1,5 +1,5 @@
 # Этап сборки
-FROM openjdk:22-jdk-slim AS builder
+FROM eclipse-temurin:22-jdk AS builder
 
 WORKDIR /app
 
@@ -11,15 +11,15 @@ COPY settings.gradle.kts .
 
 RUN chmod +x gradlew
 
-# Копируем исходники и конфиг
+# Копируем исходники, шаблоны и ресурсы
 COPY src ./src
 COPY config ./config
 
-# Собираем shadowJar, без тестов
-RUN ./gradlew clean shadowJar --no-daemon -x test
+# Собираем shadowJar без тестов
+RUN ./gradlew clean shadowJar --no-daemon
 
 # Этап продакшена
-FROM openjdk:22-jre-slim
+FROM eclipse-temurin:22-jdk
 
 WORKDIR /app
 
@@ -29,6 +29,9 @@ COPY --from=builder /app/build/libs/app-1.0-SNAPSHOT-all.jar ./app.jar
 # Порт приложения
 ENV PORT=7000
 EXPOSE $PORT
+
+# Устанавливаем рабочую директории
+# COPY src/main/resources ./resources
 
 # Команда запуска
 CMD ["java", "-jar", "app.jar"]

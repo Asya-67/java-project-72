@@ -5,8 +5,6 @@ import hexlet.code.controllers.UrlChecksController;
 import hexlet.code.repository.BaseRepository;
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
-import io.javalin.plugin.bundled.DevLoggingPlugin;
-import io.javalin.plugin.bundled.RouteOverviewPlugin;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -21,8 +19,9 @@ public class App {
         BaseRepository.initDataSource(dataSource);
 
         Javalin app = Javalin.create(config -> {
-            config.plugins.register(new DevLoggingPlugin());
-            config.plugins.register(new RouteOverviewPlugin("/routes"));
+            config.plugins.enableDevLogging();
+            config.plugins.enableRouteOverview("/routes");
+            config.addStaticFiles("/static");
         });
 
         JavalinJte.init(Methods.createTemplateEngine());

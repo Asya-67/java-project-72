@@ -59,10 +59,6 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("io.javalin:javalin-testtools:5.6.3")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
-
-    implementation("org.slf4j:slf4j-simple:2.0.16") {
-        exclude(group = "ch.qos.logback", module = "logback-classic")
-    }
 }
 
 tasks.test {
@@ -90,5 +86,13 @@ checkstyle {
 }
 
 configurations.all {
-    exclude(group = "org.slf4j", module = "slf4j-simple")
+    resolutionStrategy {
+        force(
+            "io.javalin:javalin:5.6.3",
+            "io.javalin:javalin-rendering:5.6.3",
+            "io.javalin:javalin-testtools:5.6.3"
+        )
+    }
+
+    exclude(group = "ch.qos.logback", module = "logback-classic")
 }
