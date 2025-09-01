@@ -51,6 +51,7 @@ dependencies {
     testImplementation("io.javalin:javalin-testtools:6.1.3")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
     testImplementation("com.konghq:unirest-java:3.13.6")
+    testImplementation("org.awaitility:awaitility:4.2.0")
 }
 
 tasks.test {
