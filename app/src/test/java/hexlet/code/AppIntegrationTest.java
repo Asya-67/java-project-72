@@ -6,6 +6,9 @@ import hexlet.code.repository.UrlRepository;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.BaseRepository;
 
+import static org.awaitility.Awaitility.await;
+import java.util.concurrent.TimeUnit;
+
 import io.javalin.Javalin;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -125,20 +128,29 @@ public class AppIntegrationTest {
 
     @Test
     void testUrlCheckWithSeo() throws Exception {
-
+        // HTML для мок-сервера
         String html = "<html><head><title>My Title</title>"
                 + "<meta name='description' content='My Description'></head>"
                 + "<body><h1>My H1</h1></body></html>";
         mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(html));
-        String testUrl = mockWebServer.url("/").toString();
 
+        // Сохраняем URL для проверки
+        String testUrl = mockWebServer.url("/").toString();
         Url savedUrl = urlRepository.save(new Url(testUrl));
 
+        // Отправляем POST-запрос на проверку URL
         HttpResponse<String> response = Unirest.post(baseUrl + "/urls/" + savedUrl.getId() + "/checks")
                 .asString();
 
+        // Проверяем, что сервер вернул редирект
         assertThat(response.getStatus()).isEqualTo(302);
 
+        // Ждём, пока запись проверки появится в базе
+        await().atMost(2, TimeUnit.SECONDS).until(() ->
+                !urlCheckRepository.findByUrlId(savedUrl.getId()).isEmpty()
+        );
+
+        // Получаем проверку и проверяем поля
         List<UrlCheck> checks = urlCheckRepository.findByUrlId(savedUrl.getId());
         assertThat(checks).isNotEmpty();
 
