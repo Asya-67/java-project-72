@@ -22,30 +22,19 @@ repositories {
 }
 
 dependencies {
-    // Javalin 6.x + JTE
     implementation("io.javalin:javalin:6.4.0")
     implementation("io.javalin:javalin-rendering:6.4.0")
-    implementation("gg.jte:jte:3.1.9")
     implementation("io.javalin:javalin-bundle:6.4.0")
-    // HTML-парсер
+    implementation("gg.jte:jte:3.1.9")
     implementation("org.jsoup:jsoup:1.16.1")
-
-    // HTTP-клиент
     implementation("com.konghq:unirest-java:3.13.6")
-
-    // Логирование
     implementation("org.slf4j:slf4j-simple:2.0.9")
-
-    // Базы данных
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("com.h2database:h2:2.2.224")
     implementation("org.postgresql:postgresql:42.7.3")
-
-    // Lombok
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")
 
-    // Тестирование
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core:3.24.2")
@@ -79,6 +68,11 @@ checkstyle {
     isShowViolations = true
 }
 
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+    archiveClassifier.set("all")
+    mergeServiceFiles()
+}
+
 configurations.all {
     resolutionStrategy {
         force(
@@ -89,4 +83,5 @@ configurations.all {
     }
 
     exclude(group = "ch.qos.logback", module = "logback-classic")
+    exclude(group = "org.slf4j", module = "slf4j-log4j12")
 }
