@@ -29,7 +29,11 @@ public final class UrlCheckRepository extends BaseRepository {
             ps.setString(3, check.getH1());
             ps.setString(4, check.getDescription());
             ps.setLong(5, check.getUrlId());
-            ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+
+            Timestamp timestamp = check.getCreatedAt() != null
+                    ? check.getCreatedAt()
+                    : new Timestamp(System.currentTimeMillis());
+            ps.setTimestamp(6, timestamp);
 
             ps.executeUpdate();
 
