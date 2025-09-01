@@ -71,11 +71,7 @@ public class UrlsController {
         String inputUrl = ctx.formParam("url");
 
         if (inputUrl == null || inputUrl.isBlank()) {
-            Base page = new Base();
-            page.setFlash("Добавьте URL");
-            page.setColor("danger");
-            ctx.status(200);
-            ctx.render("index.jte", Map.of("page", page));
+            Methods.handleFlash(ctx, "Добавьте URL", "danger", "/");
             return;
         }
 
@@ -88,26 +84,20 @@ public class UrlsController {
                 baseUrl += ":" + url.getPort();
             }
         } catch (Exception e) {
-            Base page = new Base();
-            page.setFlash("Некорректный URL");
-            page.setColor("danger");
-            ctx.status(200);
-            ctx.render("index.jte", Map.of("page", page));
+            Methods.handleFlash(ctx, "Некорректный URL", "danger", "/");
             return;
         }
 
         try {
             if (UrlRepository.exists(baseUrl)) {
-                Methods.handleFlash(ctx, "Страница уже существует", "warning");
-                ctx.redirect("/");
+                Methods.handleFlash(ctx, "Страница уже существует", "warning", "/");
                 return;
             }
 
             Url url = new Url(baseUrl);
             UrlRepository.save(url);
 
-            Methods.handleFlash(ctx, "Страница успешно добавлена", "success");
-            ctx.redirect("/urls/" + url.getId());
+            Methods.handleFlash(ctx, "Страница успешно добавлена", "success", "/urls/" + url.getId());
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
