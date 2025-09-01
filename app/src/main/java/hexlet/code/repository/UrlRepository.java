@@ -82,4 +82,21 @@ public final class UrlRepository extends BaseRepository {
         }
         return false;
     }
+
+    public static Url findByName(String name) throws SQLException {
+        String sql = "SELECT * FROM urls WHERE name = ?";
+        try (Connection conn = getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Url url = new Url(rs.getString("name"));
+                    url.setId(rs.getLong("id"));
+                    url.setCreatedAt(rs.getTimestamp("created_at"));
+                    return url;
+                }
+            }
+        }
+        return null;
+    }
 }

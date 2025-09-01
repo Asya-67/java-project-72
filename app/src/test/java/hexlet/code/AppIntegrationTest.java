@@ -136,13 +136,20 @@ public class AppIntegrationTest {
                 + "<body><h1>My H1</h1></body></html>";
         mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(html));
 
-        String testUrl = mockWebServer.url("/").toString();
-        Url savedUrl = UrlRepository.save(new Url(testUrl));
+        String testUrl = mockWebServer.url("/").toString().replaceAll("/$", "");
 
-        HttpResponse<String> response = Unirest.post(baseUrl + "/urls/" + savedUrl.getId() + "/checks")
+        HttpResponse<String> createResponse = Unirest.post(baseUrl + "/urls")
+                .field("url", testUrl)
                 .asString();
+        assertThat(createResponse.getStatus()).isEqualTo(302);
 
-        assertThat(response.getStatus()).isEqualTo(302);
+        Url savedUrl = UrlRepository.findByName(testUrl);
+        assertThat(savedUrl).isNotNull();
+
+        HttpResponse<String> checkResponse = Unirest.post(baseUrl + "/urls/" + savedUrl.getId()
+                        + "/checks")
+                .asString();
+        assertThat(checkResponse.getStatus()).isEqualTo(302);
 
         await().atMost(2, TimeUnit.SECONDS).until(() ->
                 !UrlCheckRepository.findByUrlId(savedUrl.getId()).isEmpty()

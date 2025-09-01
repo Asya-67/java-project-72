@@ -10,7 +10,8 @@ import hexlet.code.dto.UrlDto;
 import hexlet.code.dto.UrlsDto;
 import io.javalin.http.Context;
 
-import java.net.URI;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -67,40 +68,40 @@ public class UrlsController {
         ctx.render("url.jte", Map.of("page", page));
     }
 
-    public static void createUrl(Context ctx) {
+    public static void createUrl(Context ctx) throws SQLException {
         String inputUrl = ctx.formParam("url");
 
-        if (inputUrl == null || inputUrl.isBlank()) {
-            Methods.handleFlash(ctx, "Добавьте URL", "danger", "/");
-            return;
+        if (inputUrl == null) {
+            String body = ctx.body();
+            if (body != null && body.startsWith("url=")) {
+                inputUrl = body.substring(4);
+            }
         }
 
-        String baseUrl;
-        try {
-            URI uri = new URI(inputUrl);
-            var url = uri.toURL();
-            baseUrl = url.getProtocol() + "://" + url.getHost();
-            if (url.getPort() != -1) {
-                baseUrl += ":" + url.getPort();
-            }
-        } catch (Exception e) {
+        if (inputUrl != null && inputUrl.endsWith("/")) {
+            inputUrl = inputUrl.substring(0, inputUrl.length() - 1);
+        }
+
+        if (inputUrl == null || !isValidUrl(inputUrl)) {
             Methods.handleFlash(ctx, "Некорректный URL", "danger", "/");
             return;
         }
 
-        try {
-            if (UrlRepository.exists(baseUrl)) {
-                Methods.handleFlash(ctx, "Страница уже существует", "warning", "/");
-                return;
-            }
-
-            Url url = new Url(baseUrl);
-            UrlRepository.save(url);
-
+        Url url = UrlRepository.findByName(inputUrl);
+        if (url == null) {
+            url = UrlRepository.save(new Url(inputUrl));
             Methods.handleFlash(ctx, "Страница успешно добавлена", "success", "/urls/" + url.getId());
+        } else {
+            Methods.handleFlash(ctx, "Страница уже существует", "info", "/urls/" + url.getId());
+        }
+    }
 
-        } catch (SQLException e) {
-            Methods.handleFlash(ctx, "Ошибка при добавлении URL", "danger", "/");
+    private static boolean isValidUrl(String url) {
+        try {
+            new URL(url);
+            return true;
+        } catch (MalformedURLException e) {
+            return false;
         }
     }
 }
