@@ -18,9 +18,6 @@ import java.util.stream.Collectors;
 
 public class UrlsController {
 
-    private static final UrlRepository URL_REPOSITORY = new UrlRepository();
-    private static final UrlCheckRepository CHECK_REPOSITORY = new UrlCheckRepository();
-
     public static void showMainPage(Context ctx) {
         Base page = new Base();
         String flash = Methods.getFlash(ctx);
@@ -31,13 +28,13 @@ public class UrlsController {
     }
 
     public static void showUrlList(Context ctx) throws SQLException {
-        List<Url> urls = URL_REPOSITORY.findAll();
+        List<Url> urls = UrlRepository.findAll();
         Map<Url, UrlCheck> urlsWithLastChecks = urls.stream()
                 .collect(Collectors.toMap(
                         u -> u,
                         u -> {
                             try {
-                                return CHECK_REPOSITORY.findLastCheckByUrlId(u.getId()).orElse(null);
+                                return UrlCheckRepository.findLastCheckByUrlId(u.getId()).orElse(null);
                             } catch (SQLException e) {
                                 return null;
                             }
@@ -53,7 +50,7 @@ public class UrlsController {
 
     public static void showUrl(Context ctx) throws SQLException {
         Long id = ctx.pathParamAsClass("id", Long.class).get();
-        var urlOpt = URL_REPOSITORY.findById(id);
+        var urlOpt = UrlRepository.findById(id);
 
         if (urlOpt.isEmpty()) {
             ctx.status(404);
@@ -61,7 +58,7 @@ public class UrlsController {
         }
 
         Url url = urlOpt.get();
-        List<UrlCheck> checks = CHECK_REPOSITORY.findByUrlId(id);
+        List<UrlCheck> checks = UrlCheckRepository.findByUrlId(id);
 
         UrlDto page = new UrlDto(url, checks);
         page.setFlash(Methods.getFlash(ctx));
@@ -100,17 +97,14 @@ public class UrlsController {
         }
 
         try {
-            if (URL_REPOSITORY.exists(baseUrl)) {
-                Base page = new Base();
-                page.setFlash("Страница уже существует");
-                page.setColor("warning");
-                ctx.status(200);
-                ctx.render("index.jte", Map.of("page", page));
+            if (UrlRepository.exists(baseUrl)) {
+                Methods.handleFlash(ctx, "Страница уже существует", "warning");
+                ctx.redirect("/");
                 return;
             }
 
             Url url = new Url(baseUrl);
-            URL_REPOSITORY.save(url);
+            UrlRepository.save(url);
 
             Methods.handleFlash(ctx, "Страница успешно добавлена", "success");
             ctx.redirect("/urls/" + url.getId());

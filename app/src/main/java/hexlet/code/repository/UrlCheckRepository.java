@@ -12,9 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.sql.Statement;
 
-public class UrlCheckRepository extends BaseRepository {
+public final class UrlCheckRepository extends BaseRepository {
 
-    public UrlCheck save(UrlCheck check) throws SQLException {
+    private UrlCheckRepository() {
+
+    }
+
+    public static UrlCheck save(UrlCheck check) throws SQLException {
         String sql = "INSERT INTO url_checks (status_code, title, h1, description, url_id, created_at) "
                 + "VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = getDataSource().getConnection();
@@ -38,7 +42,7 @@ public class UrlCheckRepository extends BaseRepository {
         return check;
     }
 
-    public List<UrlCheck> findByUrlId(Long urlId) throws SQLException {
+    public static List<UrlCheck> findByUrlId(Long urlId) throws SQLException {
         String sql = "SELECT * FROM url_checks WHERE url_id = ? ORDER BY created_at DESC";
         List<UrlCheck> checks = new ArrayList<>();
         try (Connection conn = getDataSource().getConnection();
@@ -61,7 +65,7 @@ public class UrlCheckRepository extends BaseRepository {
         return checks;
     }
 
-    public Optional<UrlCheck> findLastCheckByUrlId(Long urlId) throws SQLException {
+    public static Optional<UrlCheck> findLastCheckByUrlId(Long urlId) throws SQLException {
         String sql = "SELECT * FROM url_checks WHERE url_id = ? ORDER BY id DESC LIMIT 1";
         try (Connection conn = getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

@@ -11,14 +11,12 @@ import java.time.format.DateTimeFormatter;
 
 public class Methods {
 
-    // Создание TemplateEngine для JTE
     public static TemplateEngine createTemplateEngine() {
         ClassLoader classLoader = App.class.getClassLoader();
         ResourceCodeResolver resolver = new ResourceCodeResolver("templates", classLoader);
         return TemplateEngine.create(resolver, ContentType.Html);
     }
 
-    // Получение JDBC URL
     public static String getJdbcUrl() {
         return System.getenv().getOrDefault(
                 "JDBC_DATABASE_URL",
@@ -26,32 +24,36 @@ public class Methods {
         );
     }
 
-    // Получение порта
     public static int getPort() {
         return Integer.parseInt(System.getenv().getOrDefault("PORT", "7000"));
     }
 
-    // Flash сообщения
-    public static void handleFlash(Context ctx, String message, String redirectPath) {
-        setFlash(ctx, message);
+    public static void handleFlash(Context ctx, String message, String type, String redirectPath) {
+        setFlash(ctx, message, type);
         ctx.redirect(redirectPath);
     }
 
-    public static void handleFlash(Context ctx, String message) {
-        handleFlash(ctx, message, "/urls");
+    public static void handleFlash(Context ctx, String message, String type) {
+        handleFlash(ctx, message, type, "/urls");
+    }
+
+    public static void setFlash(Context ctx, String message, String type) {
+        ctx.sessionAttribute("flash", message);
+        ctx.sessionAttribute("flash_type", type);
     }
 
     public static void setFlash(Context ctx, String message) {
-        ctx.sessionAttribute("flash", message);
+        setFlash(ctx, message, "info");
     }
 
     public static String getFlash(Context ctx) {
-        String message = ctx.sessionAttribute("flash");
-        ctx.sessionAttribute("flash", null);
-        return message;
+        return ctx.sessionAttribute("flash");
     }
 
-    // Работа с датами
+    public static String getFlashType(Context ctx) {
+        return ctx.sessionAttribute("flash_type");
+    }
+
     public static Timestamp toTimestamp(LocalDateTime dateTime) {
         return Timestamp.valueOf(dateTime);
     }

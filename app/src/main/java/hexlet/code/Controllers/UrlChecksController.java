@@ -16,15 +16,12 @@ import java.time.LocalDateTime;
 
 public class UrlChecksController {
 
-    private static final UrlRepository URL_REPOSITORY = new UrlRepository();
-    private static final UrlCheckRepository CHECK_REPOSITORY = new UrlCheckRepository();
-
     public static void makeCheck(Context ctx) {
         Long urlId = ctx.pathParamAsClass("id", Long.class).get();
 
         Url url;
         try {
-            url = URL_REPOSITORY.findById(urlId).orElse(null);
+            url = UrlRepository.findById(urlId).orElse(null);
         } catch (SQLException e) {
             Methods.handleFlash(ctx, "Ошибка при получении сайта из базы данных", "danger");
             ctx.redirect("/urls/" + urlId);
@@ -49,7 +46,7 @@ public class UrlChecksController {
             check.setDescription(doc.selectFirst("meta[name=description]") != null
                     ? doc.selectFirst("meta[name=description]").attr("content") : "");
 
-            CHECK_REPOSITORY.save(check);
+            UrlCheckRepository.save(check);
 
             Methods.handleFlash(ctx, "Проверка успешно добавлена", "success");
             ctx.redirect("/urls/" + urlId);

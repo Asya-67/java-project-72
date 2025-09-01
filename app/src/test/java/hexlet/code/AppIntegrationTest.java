@@ -36,9 +36,6 @@ public class AppIntegrationTest {
     private String baseUrl;
     private MockWebServer mockWebServer;
 
-    private UrlRepository urlRepository;
-    private UrlCheckRepository urlCheckRepository;
-
     @BeforeAll
     void beforeAll() throws SQLException, IOException {
         System.setProperty("ENV", "test");
@@ -53,9 +50,6 @@ public class AppIntegrationTest {
 
         DbInitializer.init(ds);
         BaseRepository.initDataSource(ds);
-
-        urlRepository = new UrlRepository();
-        urlCheckRepository = new UrlCheckRepository();
 
         app = App.getApp();
         app.start(0);
@@ -100,7 +94,7 @@ public class AppIntegrationTest {
                 .asString();
         assertThat(response.getStatus()).isEqualTo(302);
 
-        List<Url> urls = urlRepository.findAll();
+        List<Url> urls = UrlRepository.findAll();
         assertThat(urls).extracting(Url::getName).contains(url);
     }
 
@@ -115,9 +109,9 @@ public class AppIntegrationTest {
 
     @Test
     void testUrlsListAndShowUrl() throws SQLException {
-        Url url = urlRepository.save(new Url("https://example.org"));
+        Url url = UrlRepository.save(new Url("https://example.org"));
 
-        List<Url> urls = urlRepository.findAll();
+        List<Url> urls = UrlRepository.findAll();
         assertThat(urls).isNotEmpty();
 
         Long id = urls.get(0).getId();
@@ -128,30 +122,25 @@ public class AppIntegrationTest {
 
     @Test
     void testUrlCheckWithSeo() throws Exception {
-        // HTML для мок-сервера
+
         String html = "<html><head><title>My Title</title>"
                 + "<meta name='description' content='My Description'></head>"
                 + "<body><h1>My H1</h1></body></html>";
         mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(html));
 
-        // Сохраняем URL для проверки
         String testUrl = mockWebServer.url("/").toString();
-        Url savedUrl = urlRepository.save(new Url(testUrl));
+        Url savedUrl = UrlRepository.save(new Url(testUrl));
 
-        // Отправляем POST-запрос на проверку URL
         HttpResponse<String> response = Unirest.post(baseUrl + "/urls/" + savedUrl.getId() + "/checks")
                 .asString();
 
-        // Проверяем, что сервер вернул редирект
         assertThat(response.getStatus()).isEqualTo(302);
 
-        // Ждём, пока запись проверки появится в базе
         await().atMost(2, TimeUnit.SECONDS).until(() ->
-                !urlCheckRepository.findByUrlId(savedUrl.getId()).isEmpty()
+                !UrlCheckRepository.findByUrlId(savedUrl.getId()).isEmpty()
         );
 
-        // Получаем проверку и проверяем поля
-        List<UrlCheck> checks = urlCheckRepository.findByUrlId(savedUrl.getId());
+        List<UrlCheck> checks = UrlCheckRepository.findByUrlId(savedUrl.getId());
         assertThat(checks).isNotEmpty();
 
         UrlCheck check = checks.get(0);

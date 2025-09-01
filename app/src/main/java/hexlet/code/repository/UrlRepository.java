@@ -11,9 +11,13 @@ import hexlet.code.models.Url;
 import java.sql.Timestamp;
 import java.util.Optional;
 
-public class UrlRepository extends BaseRepository {
+public final class UrlRepository extends BaseRepository {
 
-    public Url save(Url url) throws SQLException {
+    private UrlRepository() {
+
+    }
+
+    public static Url save(Url url) throws SQLException {
         String sql = "INSERT INTO urls (name, created_at) VALUES (?, ?)";
         try (Connection conn = getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -31,7 +35,7 @@ public class UrlRepository extends BaseRepository {
         return url;
     }
 
-    public List<Url> findAll() throws SQLException {
+    public static List<Url> findAll() throws SQLException {
         String sql = "SELECT * FROM urls ORDER BY id";
         List<Url> urls = new ArrayList<>();
         try (Connection conn = getDataSource().getConnection();
@@ -48,7 +52,7 @@ public class UrlRepository extends BaseRepository {
         return urls;
     }
 
-    public Optional<Url> findById(Long id) throws SQLException {
+    public static Optional<Url> findById(Long id) throws SQLException {
         String sql = "SELECT * FROM urls WHERE id = ?";
         try (Connection conn = getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -65,7 +69,7 @@ public class UrlRepository extends BaseRepository {
         return Optional.empty();
     }
 
-    public boolean exists(String name) throws SQLException {
+    public static boolean exists(String name) throws SQLException {
         String sql = "SELECT COUNT(*) FROM urls WHERE name = ?";
         try (Connection conn = getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
