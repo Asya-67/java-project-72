@@ -4,7 +4,7 @@
 @@extends("layout.jte")
 @section content {
     <div class="container mt-4">
-        <h1>Page Analyzer</h1>
+        <h1>Добавьте URL</h1>
 
         @if(page != null && page.getFlash() != null)
             <div class="alert alert-${page.getColor()} alert-dismissible fade show" role="alert">

@@ -11,12 +11,14 @@ import java.time.format.DateTimeFormatter;
 
 public class Methods {
 
+    // Создание TemplateEngine для JTE
     public static TemplateEngine createTemplateEngine() {
         ClassLoader classLoader = App.class.getClassLoader();
         ResourceCodeResolver resolver = new ResourceCodeResolver("templates", classLoader);
         return TemplateEngine.create(resolver, ContentType.Html);
     }
 
+    // Получение JDBC URL
     public static String getJdbcUrl() {
         return System.getenv().getOrDefault(
                 "JDBC_DATABASE_URL",
@@ -24,10 +26,12 @@ public class Methods {
         );
     }
 
+    // Получение порта
     public static int getPort() {
         return Integer.parseInt(System.getenv().getOrDefault("PORT", "7000"));
     }
 
+    // Flash сообщения
     public static void handleFlash(Context ctx, String message, String redirectPath) {
         setFlash(ctx, message);
         ctx.redirect(redirectPath);
@@ -47,6 +51,7 @@ public class Methods {
         return message;
     }
 
+    // Работа с датами
     public static Timestamp toTimestamp(LocalDateTime dateTime) {
         return Timestamp.valueOf(dateTime);
     }

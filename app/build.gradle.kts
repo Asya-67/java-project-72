@@ -17,32 +17,23 @@ application {
     mainClass.set("hexlet.code.App")
 }
 
-sonar {
-    properties {
-        property ("sonar.projectKey", "Asya-67_java-project-72")
-        property ("sonar.organization", "asya-67-71")
-        property ("sonar.host.url", "https://sonarcloud.io")
-    }
-}
-
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    // Javalin + шаблоны JTE
-    implementation("io.javalin:javalin:5.6.3")
-    implementation("io.javalin:javalin-rendering:5.6.3")
+    // Javalin 6.x + JTE
+    implementation("io.javalin:javalin:6.1.3")
+    implementation("io.javalin:javalin-rendering:6.1.3")
     implementation("gg.jte:jte:3.1.9")
-
     // HTML-парсер
     implementation("org.jsoup:jsoup:1.16.1")
 
-    // HTTP-клиент (корректная версия)
+    // HTTP-клиент
     implementation("com.konghq:unirest-java:3.13.6")
 
     // Логирование
-    implementation("org.slf4j:slf4j-simple:2.0.16")
+    implementation("org.slf4j:slf4j-simple:2.0.7")
 
     // Базы данных
     implementation("com.zaxxer:HikariCP:5.1.0")
@@ -54,10 +45,10 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.30")
 
     // Тестирование
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core:3.24.2")
-    testImplementation("io.javalin:javalin-testtools:5.6.3")
+    testImplementation("io.javalin:javalin-testtools:6.1.3")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
 }
 
@@ -88,9 +79,9 @@ checkstyle {
 configurations.all {
     resolutionStrategy {
         force(
-            "io.javalin:javalin:5.6.3",
-            "io.javalin:javalin-rendering:5.6.3",
-            "io.javalin:javalin-testtools:5.6.3"
+            "io.javalin:javalin:6.1.3",
+            "io.javalin:javalin-rendering:6.1.3",
+            "io.javalin:javalin-testtools:6.1.3"
         )
     }
 

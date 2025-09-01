@@ -4,7 +4,7 @@ public final class JteindexGenerated {
 	public static final String JTE_NAME = "index.jte";
 	public static final int[] JTE_LINE_INFO = {0,0,1,1,1,8,8,8,9,9,9,9,10,10,10,13,13,23,23,23,1,1,1,1};
 	public static void render(gg.jte.html.HtmlTemplateOutput jteOutput, gg.jte.html.HtmlInterceptor jteHtmlInterceptor, Base page) {
-		jteOutput.writeContent("\r\n@@extends(\"layout.jte\")\r\n@section content {\r\n    <div class=\"container mt-4\">\r\n        <h1>Page Analyzer</h1>\r\n\r\n        ");
+		jteOutput.writeContent("\r\n@@extends(\"layout.jte\")\r\n@section content {\r\n    <div class=\"container mt-4\">\r\n        <h1>Добавьте URL</h1>\r\n\r\n        ");
 		if (page != null && page.getFlash() != null) {
 			jteOutput.writeContent("\r\n            <div class=\"alert alert-");
 			jteOutput.setContext("div", "class");
