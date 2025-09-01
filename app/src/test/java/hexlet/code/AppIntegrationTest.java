@@ -92,10 +92,13 @@ public class AppIntegrationTest {
         HttpResponse<String> response = Unirest.post(baseUrl + "/urls")
                 .field("url", url)
                 .asString();
+
         assertThat(response.getStatus()).isEqualTo(302);
 
         List<Url> urls = UrlRepository.findAll();
         assertThat(urls).extracting(Url::getName).contains(url);
+
+        assertThat(response.getHeaders().getFirst("Location")).isEqualTo("/urls/" + urls.get(0).getId());
     }
 
     @Test
@@ -103,8 +106,13 @@ public class AppIntegrationTest {
         HttpResponse<String> response = Unirest.post(baseUrl + "/urls")
                 .field("url", "invalid-url")
                 .asString();
-        assertThat(response.getStatus()).isEqualTo(200);
-        assertThat(response.getBody()).contains("Некорректный URL");
+
+        assertThat(response.getStatus()).isEqualTo(302);
+
+        assertThat(response.getHeaders().getFirst("Location")).isEqualTo("/");
+
+        HttpResponse<String> mainPage = Unirest.get(baseUrl + "/").asString();
+        assertThat(mainPage.getBody()).contains("Некорректный URL");
     }
 
     @Test

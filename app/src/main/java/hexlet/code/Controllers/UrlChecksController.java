@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 public class UrlChecksController {
+
     public static void makeCheck(Context ctx) {
         Long urlId = ctx.pathParamAsClass("id", Long.class).get();
 
@@ -27,14 +28,12 @@ public class UrlChecksController {
         }
 
         if (url == null) {
-            ctx.status(404);
+            Methods.handleFlash(ctx, "URL не найден", "danger", "/urls");
             return;
         }
 
         try {
-
             HttpResponse<String> response = Unirest.get(url.getName()).asString();
-
             int statusCode = response.getStatus();
             String body = response.getBody() != null ? response.getBody() : "";
 
@@ -54,10 +53,7 @@ public class UrlChecksController {
             check.setDescription(description);
             check.setCreatedAt(Methods.toTimestamp(LocalDateTime.now()));
 
-            UrlCheck savedCheck = UrlCheckRepository.save(check);
-            if (savedCheck.getId() == null) {
-                throw new RuntimeException("Ошибка сохранения проверки URL");
-            }
+            UrlCheckRepository.save(check);
 
             Methods.handleFlash(ctx, "Проверка успешно добавлена", "success", "/urls/" + urlId);
 

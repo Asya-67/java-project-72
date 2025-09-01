@@ -1,13 +1,13 @@
 package hexlet.code.controllers;
 
 import hexlet.code.Methods;
-import hexlet.code.dto.Base;
-import hexlet.code.dto.UrlDto;
-import hexlet.code.dto.UrlsDto;
 import hexlet.code.models.Url;
 import hexlet.code.models.UrlCheck;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlRepository;
+import hexlet.code.dto.Base;
+import hexlet.code.dto.UrlDto;
+import hexlet.code.dto.UrlsDto;
 import io.javalin.http.Context;
 
 import java.net.URI;
@@ -70,13 +70,8 @@ public class UrlsController {
     public static void createUrl(Context ctx) {
         String inputUrl = ctx.formParam("url");
 
-        Base page = new Base();
-        page.setColor("danger");
-
         if (inputUrl == null || inputUrl.isBlank()) {
-            page.setFlash("Добавьте URL");
-            ctx.status(200);
-            ctx.render("index.jte", Map.of("page", page));
+            Methods.handleFlash(ctx, "Добавьте URL", "danger", "/");
             return;
         }
 
@@ -89,9 +84,7 @@ public class UrlsController {
                 baseUrl += ":" + url.getPort();
             }
         } catch (Exception e) {
-            page.setFlash("Некорректный URL");
-            ctx.status(200);
-            ctx.render("index.jte", Map.of("page", page));
+            Methods.handleFlash(ctx, "Некорректный URL", "danger", "/");
             return;
         }
 
@@ -107,7 +100,7 @@ public class UrlsController {
             Methods.handleFlash(ctx, "Страница успешно добавлена", "success", "/urls/" + url.getId());
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Methods.handleFlash(ctx, "Ошибка при добавлении URL", "danger", "/");
         }
     }
 }
