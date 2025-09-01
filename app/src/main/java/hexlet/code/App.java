@@ -21,7 +21,6 @@ public class App {
         Javalin app = Javalin.create(config -> {
             config.plugins.enableDevLogging();
             config.plugins.enableRouteOverview("/routes");
-            config.addStaticFiles("/static");
         });
 
         JavalinJte.init(Methods.createTemplateEngine());
