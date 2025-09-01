@@ -23,9 +23,10 @@ repositories {
 
 dependencies {
     // Javalin 6.x + JTE
-    implementation("io.javalin:javalin:6.1.3")
-    implementation("io.javalin:javalin-rendering:6.1.3")
+    implementation("io.javalin:javalin:6.4.0")
+    implementation("io.javalin:javalin-rendering:6.4.0")
     implementation("gg.jte:jte:3.1.9")
+    implementation("io.javalin:javalin-bundle:6.4.0")
     // HTML-парсер
     implementation("org.jsoup:jsoup:1.16.1")
 
@@ -33,7 +34,7 @@ dependencies {
     implementation("com.konghq:unirest-java:3.13.6")
 
     // Логирование
-    implementation("org.slf4j:slf4j-simple:2.0.7")
+    implementation("org.slf4j:slf4j-simple:2.0.9")
 
     // Базы данных
     implementation("com.zaxxer:HikariCP:5.1.0")
@@ -48,7 +49,7 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core:3.24.2")
-    testImplementation("io.javalin:javalin-testtools:6.1.3")
+    testImplementation("io.javalin:javalin-testtools:6.4.0")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
     testImplementation("com.konghq:unirest-java:3.13.6")
     testImplementation("org.awaitility:awaitility:4.2.0")
@@ -81,9 +82,9 @@ checkstyle {
 configurations.all {
     resolutionStrategy {
         force(
-            "io.javalin:javalin:6.1.3",
-            "io.javalin:javalin-rendering:6.1.3",
-            "io.javalin:javalin-testtools:6.1.3"
+            "io.javalin:javalin:6.4.0",
+            "io.javalin:javalin-rendering:6.4.0",
+            "io.javalin:javalin-testtools:6.4.0"
         )
     }
 
