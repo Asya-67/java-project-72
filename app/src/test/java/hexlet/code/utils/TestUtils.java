@@ -40,8 +40,8 @@ public class TestUtils {
     public static void addUrlCheck(DataSource dataSource, long urlId) throws SQLException {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT INTO url_checks(url_id, status_code, title, h1, description) VALUES (?, 200, 'Test page'," +
-                             "'Do not expect a miracle, miracles yourself!', 'statements of great people')")) {
+                     "INSERT INTO url_checks(url_id, status_code, title, h1, description) VALUES (?, 200, 'Test page',"
+                             + "'Do not expect a miracle, miracles yourself!', 'statements of great people')")) {
             stmt.setLong(1, urlId);
             stmt.executeUpdate();
         }
