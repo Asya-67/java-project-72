@@ -21,6 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import hexlet.code.utils.TestUtils;
 import javax.sql.DataSource;
 
+/**
+ * Интеграционные тесты приложения.
+ */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AppIntegrationTest {
     private DataSource dataSource;
@@ -37,7 +40,10 @@ public class AppIntegrationTest {
     private static String readFixture(String fileName) throws IOException {
         return Files.readString(getFixturePath(fileName)).trim();
     }
-
+    /**
+     * Метод вызывается перед всеми тестами.
+     * Настраивает мок-сервер.
+     */
     @BeforeAll
     void beforeAll() throws IOException {
         mockServer = new MockWebServer();
@@ -45,12 +51,19 @@ public class AppIntegrationTest {
         mockServer.enqueue(mockedResponse);
         mockServer.start();
     }
-
+    /**
+     * Метод вызывается после всех тестов.
+     * Останавливает мок-сервер.
+     */
     @AfterAll
     void afterAll() throws IOException {
         mockServer.shutdown();
     }
 
+    /**
+     * Метод вызывается перед каждым тестом.
+     * Подготавливает БД и тестовые данные.
+     */
     @BeforeEach
     void setUp() throws IOException, SQLException {
         app = App.getApp();
