@@ -1,4 +1,5 @@
 @import hexlet.code.dto.UrlsDto
+@import hexlet.code.Methods
 @param UrlsDto page = null
 
 @extends("layout.jte")
@@ -15,24 +16,23 @@
                 </tr>
             </thead>
             <tbody>
-                @for(url, check : page.getUrlsWithLastChecks().entrySet())
+                @for(var entry : page.getUrlsWithLastChecks().entrySet())
                     <tr>
-                        <td>${url.getId()}</td>
-                        <td>${url.getName()}</td>
+                        <td>${entry.getKey().getId()}</td>
+                        <td>${entry.getKey().getName()}</td>
                         <td>
-                            @if(check != null)
-                                ${check.getCreatedAt()}
+                            @if(entry.getValue() != null)
+                                ${Methods.timeFormat(entry.getValue().getCreatedAt())}
                             @else
                                 Нет проверок
                             @endif
                         </td>
                         <td>
-                            <a href="/urls/${url.getId()}" class="btn btn-sm btn-primary">Посмотреть</a>
+                            <a href="/urls/${entry.getKey().getId()}" class="btn btn-sm btn-primary">Посмотреть</a>
                         </td>
                     </tr>
-                @end
+                @endfor
             </tbody>
         </table>
     </div>
 }
-
