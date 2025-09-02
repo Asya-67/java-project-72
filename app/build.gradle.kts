@@ -28,7 +28,7 @@ dependencies {
     implementation("gg.jte:jte:3.1.9")
     implementation("org.jsoup:jsoup:1.16.1")
     implementation("com.konghq:unirest-java:3.13.6")
-    implementation("org.slf4j:slf4j-simple:2.0.9")
+    implementation("ch.qos.logback:logback-classic:1.4.11")
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("com.h2database:h2:2.2.224")
     implementation("org.postgresql:postgresql:42.7.3")
@@ -82,6 +82,6 @@ configurations.all {
         )
     }
 
-    exclude(group = "ch.qos.logback", module = "logback-classic")
+    exclude(group = "org.slf4j", module = "slf4j-simple")
     exclude(group = "org.slf4j", module = "slf4j-log4j12")
 }
