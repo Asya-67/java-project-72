@@ -85,86 +85,87 @@ public class AppIntegrationTest {
             });
         }
 
-    @Nested
-    class UrlTest {
-        @Test
-        void testUrlsList() {
-            JavalinTest.test(app, (server, client) -> {
-                try (var response = client.get("/urls")) {
-                    assertThat(response.code()).isEqualTo(200);
-                    String body = response.body().string();
-                    assertThat(body).contains(existingUrl.get("name").toString());
+        @Nested
+        class UrlTest {
+            @Test
+            void testUrlsList() {
+                JavalinTest.test(app, (server, client) -> {
+                    try (var response = client.get("/urls")) {
+                        assertThat(response.code()).isEqualTo(200);
+                        String body = response.body().string();
+                        assertThat(body).contains(existingUrl.get("name").toString());
 
-                    if (existingUrlCheck.get("created_at") != null) {
-                        String formattedDate = existingUrlCheck.get("created_at").toString();
-                        assertThat(body).contains(formattedDate);
+                        if (existingUrlCheck.get("created_at") != null) {
+                            String formattedDate = existingUrlCheck.get("created_at").toString();
+                            assertThat(body).contains(formattedDate);
+                        }
                     }
-                }
-            });
+                });
+            }
+
+            @Test
+            void testShowUrl() {
+                JavalinTest.test(app, (server, client) -> {
+                    try (var response = client.get("/urls/" + existingUrl.get("id"))) {
+                        assertThat(response.code()).isEqualTo(200);
+                        String body = response.body().string();
+                        assertThat(body).contains(existingUrl.get("name").toString())
+                                .contains(existingUrlCheck.get("status_code").toString());
+                    }
+                });
+            }
+
+            @Test
+            void testStoreUrl() {
+                String inputUrl = "https://ru.hexlet.io";
+                JavalinTest.test(app, (server, client) -> {
+                    var requestBody = "url=" + inputUrl;
+                    try (var postResponse = client.post("/urls", requestBody)) {
+                        assertThat(postResponse.code()).isEqualTo(200);
+                    }
+
+                    try (var getResponse = client.get("/urls")) {
+                        assertThat(getResponse.code()).isEqualTo(200);
+                        assertThat(getResponse.body().string()).contains(inputUrl);
+                    }
+
+                    var actualUrl = TestUtils.getUrlByName(Database.getDataSource(), inputUrl);
+                    assertThat(actualUrl).isNotNull();
+                    assertThat(actualUrl.get("name").toString()).isEqualTo(inputUrl);
+                });
+            }
         }
 
-        @Test
-        void testShowUrl() {
-            JavalinTest.test(app, (server, client) -> {
-                try (var response = client.get("/urls/" + existingUrl.get("id"))) {
-                    assertThat(response.code()).isEqualTo(200);
-                    String body = response.body().string();
-                    assertThat(body).contains(existingUrl.get("name").toString())
-                            .contains(existingUrlCheck.get("status_code").toString());
-                }
-            });
-        }
+        @Nested
+        class UrlCheckTest {
+            @Test
+            void testStoreUrlCheck() {
+                String url = mockServer.url("/").toString().replaceAll("/$", "");
+                JavalinTest.test(app, (server, client) -> {
+                    var requestBody = "url=" + url;
+                    try (var postResponse = client.post("/urls", requestBody)) {
+                        assertThat(postResponse.code()).isEqualTo(200);
+                    }
 
-        @Test
-        void testStoreUrl() {
-            String inputUrl = "https://ru.hexlet.io";
-            JavalinTest.test(app, (server, client) -> {
-                var requestBody = "url=" + inputUrl;
-                try (var postResponse = client.post("/urls", requestBody)) {
-                    assertThat(postResponse.code()).isEqualTo(200);
-                }
+                    var actualUrl = TestUtils.getUrlByName(Database.getDataSource(), url);
+                    assertThat(actualUrl).isNotNull();
+                    assertThat(actualUrl.get("name").toString()).isEqualTo(url);
 
-                try (var getResponse = client.get("/urls")) {
-                    assertThat(getResponse.code()).isEqualTo(200);
-                    assertThat(getResponse.body().string()).contains(inputUrl);
-                }
+                    try (var checkResponse = client.post("/urls/" + actualUrl.get("id") + "/checks")) {
+                        assertThat(checkResponse.code()).isEqualTo(200);
+                    }
 
-                var actualUrl = TestUtils.getUrlByName(Database.getDataSource(), inputUrl);
-                assertThat(actualUrl).isNotNull();
-                assertThat(actualUrl.get("name").toString()).isEqualTo(inputUrl);
-            });
-        }
-    }
+                    try (var getResponse = client.get("/urls/" + actualUrl.get("id"))) {
+                        assertThat(getResponse.code()).isEqualTo(200);
+                    }
 
-    @Nested
-    class UrlCheckTest {
-        @Test
-        void testStoreUrlCheck() {
-            String url = mockServer.url("/").toString().replaceAll("/$", "");
-            JavalinTest.test(app, (server, client) -> {
-                var requestBody = "url=" + url;
-                try (var postResponse = client.post("/urls", requestBody)) {
-                    assertThat(postResponse.code()).isEqualTo(200);
-                }
-
-                var actualUrl = TestUtils.getUrlByName(Database.getDataSource(), url);
-                assertThat(actualUrl).isNotNull();
-                assertThat(actualUrl.get("name").toString()).isEqualTo(url);
-
-                try (var checkResponse = client.post("/urls/" + actualUrl.get("id") + "/checks")) {
-                    assertThat(checkResponse.code()).isEqualTo(200);
-                }
-
-                try (var getResponse = client.get("/urls/" + actualUrl.get("id"))) {
-                    assertThat(getResponse.code()).isEqualTo(200);
-                }
-
-                var actualCheck = TestUtils.getUrlCheck(Database.getDataSource(), (long) actualUrl.get("id"));
-                assertThat(actualCheck).isNotNull();
-                assertThat(actualCheck.get("title")).isEqualTo("Test page");
-                assertThat(actualCheck.get("h1")).isEqualTo("Do not expect a miracle, miracles yourself!");
-                assertThat(actualCheck.get("description")).isEqualTo("statements of great people");
-            });
+                    var actualCheck = TestUtils.getUrlCheck(Database.getDataSource(), (long) actualUrl.get("id"));
+                    assertThat(actualCheck).isNotNull();
+                    assertThat(actualCheck.get("title")).isEqualTo("Test page");
+                    assertThat(actualCheck.get("h1")).isEqualTo("Do not expect a miracle, miracles yourself!");
+                    assertThat(actualCheck.get("description")).isEqualTo("statements of great people");
+                });
+            }
         }
     }
 }
