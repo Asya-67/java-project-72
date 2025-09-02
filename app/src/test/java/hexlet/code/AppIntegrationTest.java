@@ -78,7 +78,7 @@ public class AppIntegrationTest {
             JavalinTest.test(app, (server, client) -> {
                 try (var response = client.get("/")) {
                     assertThat(response.code()).isEqualTo(200);
-                    assertThat(response.body().string()).contains("Список сайтов");
+                    assertThat(response.body().string()).contains("Добавьте URL");
                 }
             });
         }
