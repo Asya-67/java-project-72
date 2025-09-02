@@ -12,6 +12,7 @@
                     <th>ID</th>
                     <th>URL</th>
                     <th>Последняя проверка</th>
+                    <th>Статус</th> <!-- новая колонка -->
                     <th>Действия</th>
                 </tr>
             </thead>
@@ -25,6 +26,13 @@
                                 ${Methods.timeFormat(entry.getValue().getCreatedAt())}
                             @else
                                 Нет проверок
+                            @endif
+                        </td>
+                        <td>
+                            @if(entry.getValue() != null)
+                                ${entry.getValue().getStatusCode()}
+                            @else
+                                -
                             @endif
                         </td>
                         <td>
