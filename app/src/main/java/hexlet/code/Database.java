@@ -20,10 +20,11 @@ public class Database {
             String password;
 
             String databaseUrl = System.getenv("JDBC_DATABASE_URL");
+            String envUsername = System.getenv("JDBC_DATABASE_USERNAME");
+            String envPassword = System.getenv("JDBC_DATABASE_PASSWORD");
 
             if (databaseUrl != null && !databaseUrl.isBlank()) {
                 try {
-
                     if (databaseUrl.startsWith("postgres://")) {
                         databaseUrl = databaseUrl.replaceFirst("postgres://", "postgresql://");
                     }
@@ -31,13 +32,18 @@ public class Database {
                     URI dbUri = new URI(databaseUrl);
 
                     String userInfo = dbUri.getUserInfo();
-                    if (userInfo == null || !userInfo.contains(":")) {
-                        throw new RuntimeException("JDBC_DATABASE_URL не содержит username и password");
+                    if ((userInfo == null || !userInfo.contains(":")) && (envUsername == null || envPassword == null)) {
+                        throw new RuntimeException("JDBC_DATABASE_URL не содержит username и password, и переменные окружения не заданы");
                     }
 
-                    String[] userParts = userInfo.split(":");
-                    username = userParts[0];
-                    password = userParts[1];
+                    if (userInfo != null && userInfo.contains(":")) {
+                        String[] userParts = userInfo.split(":");
+                        username = userParts[0];
+                        password = userParts[1];
+                    } else {
+                        username = envUsername;
+                        password = envPassword;
+                    }
 
                     jdbcUrl = "jdbc:postgresql://" + dbUri.getHost()
                             + ":" + dbUri.getPort()
