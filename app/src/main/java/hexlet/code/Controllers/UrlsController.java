@@ -32,16 +32,24 @@ public class UrlsController {
 
     public static void showUrlList(Context ctx) throws SQLException {
         List<Url> urls = UrlRepository.findAll();
-
         Map<Url, UrlCheck> urlsWithLastChecks = new HashMap<>();
+
         for (Url url : urls) {
             UrlCheck lastCheck = UrlCheckRepository.findLastCheckByUrlId(url.getId()).orElse(null);
             urlsWithLastChecks.put(url, lastCheck);
         }
 
         var page = new UrlsDto(urlsWithLastChecks);
-        page.setFlash(Methods.getFlash(ctx));
-        page.setColor(FlashColors.INFO);
+
+        String flash = Methods.getFlash(ctx);
+        if (flash != null) {
+            page.setFlash(flash);
+            page.setColor(Methods.getFlashType(ctx));
+            ctx.sessionAttribute("flash", null);
+            ctx.sessionAttribute("flash_type", null);
+        } else {
+            page.setColor(FlashColors.INFO);
+        }
 
         ctx.status(200).render("urls.jte", Map.of("page", page));
     }
@@ -59,8 +67,16 @@ public class UrlsController {
         List<UrlCheck> checks = UrlCheckRepository.findByUrlId(id);
 
         var page = new UrlDto(url, checks);
-        page.setFlash(Methods.getFlash(ctx));
-        page.setColor(FlashColors.INFO);
+
+        String flash = Methods.getFlash(ctx);
+        if (flash != null) {
+            page.setFlash(flash);
+            page.setColor(Methods.getFlashType(ctx));
+            ctx.sessionAttribute("flash", null);
+            ctx.sessionAttribute("flash_type", null);
+        } else {
+            page.setColor(FlashColors.INFO);
+        }
 
         ctx.status(200).render("url.jte", Map.of("page", page));
     }
@@ -91,12 +107,12 @@ public class UrlsController {
 
         Url existingUrl = UrlRepository.findByName(normalizedUrl);
         if (existingUrl != null) {
-            Methods.handleFlash(ctx, FlashMessages.URL_ALREADY_EXISTS, FlashColors.INFO,
-                    "/urls/" + existingUrl.getId());
+            Methods.setFlash(ctx, FlashMessages.URL_ALREADY_EXISTS, FlashColors.INFO);
+            ctx.redirect("/urls");
         } else {
             Url newUrl = UrlRepository.save(new Url(normalizedUrl));
-            Methods.handleFlash(ctx, FlashMessages.URL_ADDED, FlashColors.SUCCESS,
-                    "/urls/" + newUrl.getId());
+            Methods.setFlash(ctx, FlashMessages.URL_ADDED, FlashColors.SUCCESS);
+            ctx.redirect("/urls/" + newUrl.getId());
         }
     }
 

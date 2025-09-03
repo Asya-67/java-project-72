@@ -33,7 +33,8 @@ public class Database {
 
                     String userInfo = dbUri.getUserInfo();
                     if ((userInfo == null || !userInfo.contains(":")) && (envUsername == null || envPassword == null)) {
-                        throw new RuntimeException("JDBC_DATABASE_URL не содержит username и password, и переменные окружения не заданы");
+                        throw new RuntimeException("JDBC_DATABASE_URL не содержит username и password, "
+                                + "и переменные окружения не заданы");
                     }
 
                     if (userInfo != null && userInfo.contains(":")) {

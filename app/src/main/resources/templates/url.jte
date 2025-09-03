@@ -4,6 +4,13 @@
 
 @@extends("layout/commonsite.jte")
 @section content {
+
+    @if(page.getFlash() != null)
+        <div class="alert alert-${page.getColor()}">
+            ${page.getFlash()}
+        </div>
+    @endif
+
     <h1 class="mb-4">Страница: ${page.getUrl().getName()}</h1>
 
     <div class="mb-3">

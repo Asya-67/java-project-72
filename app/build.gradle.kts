@@ -89,3 +89,14 @@ configurations.all {
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "Asya-67_java-project-72")
+        property("sonar.organization", "asya-67-71")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.login", System.getenv("SONAR_TOKEN"))
+        property("sonar.java.coveragePlugin", "jacoco")
+        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
+    }
+}
