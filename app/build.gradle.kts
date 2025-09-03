@@ -85,3 +85,7 @@ configurations.all {
     exclude(group = "org.slf4j", module = "slf4j-simple")
     exclude(group = "org.slf4j", module = "slf4j-log4j12")
 }
+
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}

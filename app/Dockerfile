@@ -37,5 +37,10 @@ EXPOSE $PORT
 # Профиль Spring по умолчанию — prod
 ENV SPRING_PROFILES_ACTIVE=prod
 
+
+# Установить локаль UTF-8
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
 # Команда запуска с использованием профиля
 CMD ["java", "-jar", "app.jar", "--spring.profiles.active=${SPRING_PROFILES_ACTIVE}"]

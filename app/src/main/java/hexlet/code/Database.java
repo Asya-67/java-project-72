@@ -4,6 +4,8 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import javax.sql.DataSource;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class Database {
 
@@ -13,22 +15,39 @@ public class Database {
         if (dataSource == null) {
             HikariConfig config = new HikariConfig();
 
-            String jdbcUrl = System.getenv().getOrDefault(
-                    "JDBC_DATABASE_URL",
-                    "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
-            );
-            String username = System.getenv().getOrDefault("JDBC_DATABASE_USERNAME", "sa");
-            String password = System.getenv().getOrDefault("JDBC_DATABASE_PASSWORD", "");
+            String jdbcUrl;
+            String username;
+            String password;
+
+            String databaseUrl = System.getenv("JDBC_DATABASE_URL");
+
+            if (databaseUrl != null && !databaseUrl.isBlank()) {
+                try {
+                    URI dbUri = new URI(databaseUrl);
+                    String[] userInfo = dbUri.getUserInfo().split(":");
+                    username = userInfo[0];
+                    password = userInfo[1];
+                    jdbcUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() + dbUri.getPath();
+
+                    Class.forName("org.postgresql.Driver");
+                } catch (URISyntaxException | NullPointerException | ClassNotFoundException e) {
+                    throw new RuntimeException("Invalid JDBC_DATABASE_URL or PostgreSQL driver not found", e);
+                }
+            } else {
+
+                jdbcUrl = "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+                username = "sa";
+                password = "";
+                try {
+                    Class.forName("org.h2.Driver");
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException("H2 Driver not found", e);
+                }
+            }
 
             config.setJdbcUrl(jdbcUrl);
             config.setUsername(username);
             config.setPassword(password);
-
-            if (jdbcUrl.startsWith("jdbc:h2")) {
-                config.setDriverClassName("org.h2.Driver");
-            } else if (jdbcUrl.startsWith("jdbc:postgresql")) {
-                config.setDriverClassName("org.postgresql.Driver");
-            }
             config.setMaximumPoolSize(10);
             config.setMinimumIdle(2);
             config.setIdleTimeout(30000);
@@ -37,6 +56,7 @@ public class Database {
 
             dataSource = new HikariDataSource(config);
         }
+
         return dataSource;
     }
 

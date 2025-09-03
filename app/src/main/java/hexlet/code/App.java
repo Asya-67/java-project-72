@@ -5,6 +5,7 @@ import hexlet.code.controllers.UrlsController;
 import hexlet.code.repository.BaseRepository;
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
+
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
@@ -23,6 +24,7 @@ public class App {
             config.fileRenderer(new JavalinJte(Methods.createTemplateEngine()));
         });
 
+        app.before(ctx -> ctx.contentType("text/html; charset=UTF-8"));
 
         app.get(AppPaths.mainPath(), UrlsController::showMainPage);
         app.get(AppPaths.urlsPath(), UrlsController::showUrlList);
