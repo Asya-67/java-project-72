@@ -23,15 +23,29 @@ public class Database {
 
             if (databaseUrl != null && !databaseUrl.isBlank()) {
                 try {
+
+                    if (databaseUrl.startsWith("postgres://")) {
+                        databaseUrl = databaseUrl.replaceFirst("postgres://", "postgresql://");
+                    }
+
                     URI dbUri = new URI(databaseUrl);
-                    String[] userInfo = dbUri.getUserInfo().split(":");
-                    username = userInfo[0];
-                    password = userInfo[1];
-                    jdbcUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() + dbUri.getPath();
+
+                    String userInfo = dbUri.getUserInfo();
+                    if (userInfo == null || !userInfo.contains(":")) {
+                        throw new RuntimeException("JDBC_DATABASE_URL не содержит username и password");
+                    }
+
+                    String[] userParts = userInfo.split(":");
+                    username = userParts[0];
+                    password = userParts[1];
+
+                    jdbcUrl = "jdbc:postgresql://" + dbUri.getHost()
+                            + ":" + dbUri.getPort()
+                            + dbUri.getPath();
 
                     Class.forName("org.postgresql.Driver");
-                } catch (URISyntaxException | NullPointerException | ClassNotFoundException e) {
-                    throw new RuntimeException("Invalid JDBC_DATABASE_URL or PostgreSQL driver not found", e);
+                } catch (URISyntaxException | ClassNotFoundException e) {
+                    throw new RuntimeException("Неправильный JDBC_DATABASE_URL или драйвер PostgreSQL не найден", e);
                 }
             } else {
 
@@ -48,6 +62,7 @@ public class Database {
             config.setJdbcUrl(jdbcUrl);
             config.setUsername(username);
             config.setPassword(password);
+
             config.setMaximumPoolSize(10);
             config.setMinimumIdle(2);
             config.setIdleTimeout(30000);
