@@ -20,8 +20,6 @@ public class Database {
             String password = null;
 
             String databaseUrl = System.getenv("JDBC_DATABASE_URL");
-            String envUsername = System.getenv("JDBC_DATABASE_USERNAME");
-            String envPassword = System.getenv("JDBC_DATABASE_PASSWORD");
 
             if (databaseUrl != null && !databaseUrl.isBlank()) {
                 try {
@@ -30,30 +28,23 @@ public class Database {
                     }
 
                     URI dbUri = new URI(databaseUrl);
+                    String userInfo = dbUri.getUserInfo();
 
-                    if (dbUri.getUserInfo() != null) {
-                        String[] userInfo = dbUri.getUserInfo().split(":");
-                        username = userInfo[0];
-                        password = userInfo.length > 1 ? userInfo[1] : "";
-                    } else if (envUsername != null && envPassword != null) {
-                        username = envUsername;
-                        password = envPassword;
-                    } else {
-                        throw new RuntimeException("JDBC_DATABASE_URL не содержит username и password, " +
-                                "и переменные окружения не заданы");
+                    if (userInfo != null && userInfo.contains(":")) {
+                        String[] userParts = userInfo.split(":");
+                        username = userParts[0];
+                        password = userParts[1];
                     }
 
                     jdbcUrl = "jdbc:postgresql://" + dbUri.getHost()
-                            + ":" + (dbUri.getPort() != -1 ? dbUri.getPort() : 5432)
+                            + ":" + dbUri.getPort()
                             + dbUri.getPath();
 
                     Class.forName("org.postgresql.Driver");
-
                 } catch (URISyntaxException | ClassNotFoundException e) {
                     throw new RuntimeException("Неправильный JDBC_DATABASE_URL или драйвер PostgreSQL не найден", e);
                 }
             } else {
-
                 jdbcUrl = "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
                 username = "sa";
                 password = "";
