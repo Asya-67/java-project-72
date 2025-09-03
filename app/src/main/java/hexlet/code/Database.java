@@ -18,11 +18,10 @@ public class Database {
             if (databaseUrl != null && !databaseUrl.isBlank()) {
 
                 if (!databaseUrl.startsWith("jdbc:")) {
-                    config.setJdbcUrl("jdbc:" + databaseUrl);
-                } else {
-                    config.setJdbcUrl(databaseUrl);
+                    databaseUrl = "jdbc:" + databaseUrl;
                 }
-
+                config.setJdbcUrl(databaseUrl);
+                config.setDriverClassName("org.postgresql.Driver");
             } else {
 
                 config.setJdbcUrl("jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;MODE=PostgreSQL");
