@@ -34,7 +34,7 @@
         @if(page != null && page.getFlash() != null)
             <div class="alert alert-${page.getColor()} alert-dismissible fade show" role="alert">
                 ${page.getFlash()}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
