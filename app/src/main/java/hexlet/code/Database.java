@@ -4,8 +4,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import javax.sql.DataSource;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 public class Database {
 
@@ -15,49 +13,22 @@ public class Database {
         if (dataSource == null) {
             HikariConfig config = new HikariConfig();
 
-            String jdbcUrl;
-            String username = null;
-            String password = null;
-
             String databaseUrl = System.getenv("JDBC_DATABASE_URL");
 
             if (databaseUrl != null && !databaseUrl.isBlank()) {
-                try {
-                    if (databaseUrl.startsWith("postgres://")) {
-                        databaseUrl = databaseUrl.replaceFirst("postgres://", "postgresql://");
-                    }
 
-                    URI dbUri = new URI(databaseUrl);
-                    String userInfo = dbUri.getUserInfo();
-
-                    if (userInfo != null && userInfo.contains(":")) {
-                        String[] userParts = userInfo.split(":");
-                        username = userParts[0];
-                        password = userParts[1];
-                    }
-
-                    jdbcUrl = "jdbc:postgresql://" + dbUri.getHost()
-                            + ":" + dbUri.getPort()
-                            + dbUri.getPath();
-
-                    Class.forName("org.postgresql.Driver");
-                } catch (URISyntaxException | ClassNotFoundException e) {
-                    throw new RuntimeException("Неправильный JDBC_DATABASE_URL или драйвер PostgreSQL не найден", e);
+                if (!databaseUrl.startsWith("jdbc:")) {
+                    config.setJdbcUrl("jdbc:" + databaseUrl);
+                } else {
+                    config.setJdbcUrl(databaseUrl);
                 }
+
             } else {
-                jdbcUrl = "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
-                username = "sa";
-                password = "";
-                try {
-                    Class.forName("org.h2.Driver");
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException("H2 Driver not found", e);
-                }
-            }
 
-            config.setJdbcUrl(jdbcUrl);
-            config.setUsername(username);
-            config.setPassword(password);
+                config.setJdbcUrl("jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;MODE=PostgreSQL");
+                config.setUsername("sa");
+                config.setPassword("");
+            }
 
             config.setMaximumPoolSize(10);
             config.setMinimumIdle(2);

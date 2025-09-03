@@ -34,13 +34,12 @@ COPY --from=builder /app/build/libs/app-1.0-SNAPSHOT-all.jar ./app.jar
 ENV PORT=7000
 EXPOSE $PORT
 
-# Профиль Spring по умолчанию — prod
-ENV SPRING_PROFILES_ACTIVE=prod
-
+# Передаем JDBC_DATABASE_URL из Render
+ENV JDBC_DATABASE_URL=${JDBC_DATABASE_URL}
 
 # Установить локаль UTF-8
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
-# Команда запуска с использованием профиля
-CMD ["java", "-jar", "app.jar", "--spring.profiles.active=${SPRING_PROFILES_ACTIVE}"]
+# Команда запуска
+CMD ["java", "-jar", "app.jar"]
