@@ -1,6 +1,8 @@
 package hexlet.code.controllers;
 
 import hexlet.code.Methods;
+import hexlet.code.constants.FlashColors;
+import hexlet.code.constants.FlashMessages;
 import hexlet.code.models.Url;
 import hexlet.code.models.UrlCheck;
 import hexlet.code.repository.UrlCheckRepository;
@@ -19,16 +21,8 @@ public class UrlChecksController {
     public static void makeCheck(Context ctx) {
         Long urlId = ctx.pathParamAsClass("id", Long.class).get();
 
-        Url url;
-        try {
-            url = UrlRepository.findById(urlId).orElse(null);
-        } catch (SQLException e) {
-            Methods.handleFlash(ctx, "Ошибка при получении сайта из базы данных", "danger", "/urls/" + urlId);
-            return;
-        }
-
+        Url url = getUrlOrFlash(ctx, urlId);
         if (url == null) {
-            Methods.handleFlash(ctx, "URL не найден", "danger", "/urls");
             return;
         }
 
@@ -55,10 +49,27 @@ public class UrlChecksController {
 
             UrlCheckRepository.save(check);
 
-            Methods.handleFlash(ctx, "Проверка успешно добавлена", "success", "/urls/" + urlId);
+            Methods.handleFlash(ctx, FlashMessages.CHECK_ADDED, FlashColors.SUCCESS, urlPath(urlId));
 
         } catch (Exception e) {
-            Methods.handleFlash(ctx, "Ошибка при проверке сайта", "danger", "/urls/" + urlId);
+            Methods.handleFlash(ctx, FlashMessages.CHECK_ERROR, FlashColors.DANGER, urlPath(urlId));
         }
+    }
+
+    private static Url getUrlOrFlash(Context ctx, Long urlId) {
+        try {
+            Url url = UrlRepository.findById(urlId).orElse(null);
+            if (url == null) {
+                Methods.handleFlash(ctx, FlashMessages.URL_NOT_FOUND, FlashColors.DANGER, "/urls");
+            }
+            return url;
+        } catch (SQLException e) {
+            Methods.handleFlash(ctx, FlashMessages.DB_ERROR, FlashColors.DANGER, urlPath(urlId));
+            return null;
+        }
+    }
+
+    private static String urlPath(Long id) {
+        return "/urls/" + id;
     }
 }

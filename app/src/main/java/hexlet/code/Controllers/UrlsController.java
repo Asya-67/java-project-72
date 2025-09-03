@@ -5,9 +5,10 @@ import hexlet.code.models.Url;
 import hexlet.code.models.UrlCheck;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlRepository;
-import hexlet.code.dto.Base;
 import hexlet.code.dto.UrlDto;
 import hexlet.code.dto.UrlsDto;
+import hexlet.code.constants.FlashColors;
+import hexlet.code.constants.FlashMessages;
 import io.javalin.http.Context;
 
 import java.net.MalformedURLException;
@@ -21,10 +22,10 @@ import java.util.Optional;
 public class UrlsController {
 
     public static void showMainPage(Context ctx) {
-        Base page = new Base();
+        var page = new UrlsDto(new HashMap<>());
         String flash = Methods.getFlash(ctx);
         page.setFlash(flash != null ? flash : "Добавьте URL");
-        page.setColor("info");
+        page.setColor(FlashColors.INFO);
 
         ctx.status(200).render("index.jte", Map.of("page", page));
     }
@@ -38,9 +39,9 @@ public class UrlsController {
             urlsWithLastChecks.put(url, lastCheck);
         }
 
-        UrlsDto page = new UrlsDto(urlsWithLastChecks);
+        var page = new UrlsDto(urlsWithLastChecks);
         page.setFlash(Methods.getFlash(ctx));
-        page.setColor("info");
+        page.setColor(FlashColors.INFO);
 
         ctx.status(200).render("urls.jte", Map.of("page", page));
     }
@@ -57,9 +58,9 @@ public class UrlsController {
         Url url = urlOpt.get();
         List<UrlCheck> checks = UrlCheckRepository.findByUrlId(id);
 
-        UrlDto page = new UrlDto(url, checks);
+        var page = new UrlDto(url, checks);
         page.setFlash(Methods.getFlash(ctx));
-        page.setColor("info");
+        page.setColor(FlashColors.INFO);
 
         ctx.status(200).render("url.jte", Map.of("page", page));
     }
@@ -67,7 +68,7 @@ public class UrlsController {
     public static void createUrl(Context ctx) throws SQLException {
         String inputUrl = extractUrl(ctx);
         if (inputUrl == null || inputUrl.isBlank()) {
-            Methods.handleFlash(ctx, "Некорректный URL", "danger", "/");
+            Methods.handleFlash(ctx, FlashMessages.INVALID_URL, FlashColors.DANGER, "/");
             return;
         }
 
@@ -77,7 +78,7 @@ public class UrlsController {
         try {
             parsedUrl = new URL(inputUrl);
         } catch (MalformedURLException e) {
-            Methods.handleFlash(ctx, "Некорректный URL", "danger", "/");
+            Methods.handleFlash(ctx, FlashMessages.INVALID_URL, FlashColors.DANGER, "/");
             return;
         }
 
@@ -90,11 +91,12 @@ public class UrlsController {
 
         Url existingUrl = UrlRepository.findByName(normalizedUrl);
         if (existingUrl != null) {
-            Methods.handleFlash(ctx, "Страница уже существует", "info", "/urls/" + existingUrl.getId());
+            Methods.handleFlash(ctx, FlashMessages.URL_ALREADY_EXISTS, FlashColors.INFO,
+                    "/urls/" + existingUrl.getId());
         } else {
             Url newUrl = UrlRepository.save(new Url(normalizedUrl));
-            Methods.handleFlash(ctx, "Страница успешно добавлена", "success", "/urls/"
-                    + newUrl.getId());
+            Methods.handleFlash(ctx, FlashMessages.URL_ADDED, FlashColors.SUCCESS,
+                    "/urls/" + newUrl.getId());
         }
     }
 

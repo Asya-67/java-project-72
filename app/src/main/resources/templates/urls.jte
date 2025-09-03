@@ -2,45 +2,46 @@
 @import hexlet.code.Methods
 @param UrlsDto page = null
 
-@extends("layout.jte")
+@@extends("layout/commonsite.jte")
 @section content {
-    <div class="container mt-4">
-        <h1>Список сайтов</h1>
-        <table class="table table-bordered mt-3">
-            <thead>
+    <h1 class="mb-4">Список сайтов</h1>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>URL</th>
+                <th>Последняя проверка</th>
+                <th>Статус</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for(var entry : page.getUrlsWithLastChecks().entrySet())
                 <tr>
-                    <th>ID</th>
-                    <th>URL</th>
-                    <th>Последняя проверка</th>
-                    <th>Статус</th> <!-- новая колонка -->
-                    <th>Действия</th>
+                    <td>${entry.getKey().getId()}</td>
+                    <td>${entry.getKey().getName()}</td>
+                    <td>
+                        @if(entry.getValue() != null)
+                            ${Methods.timeFormat(entry.getValue().getCreatedAt())}
+                        @else
+                            Нет проверок
+                        @endif
+                    </td>
+                    <td>
+                        @if(entry.getValue() != null)
+                            ${entry.getValue().getStatusCode()}
+                        @else
+                            -
+                        @endif
+                    </td>
+                    <td>
+                        <a href="/urls/${entry.getKey().getId()}" class="btn btn-sm btn-primary">Посмотреть</a>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @for(var entry : page.getUrlsWithLastChecks().entrySet())
-                    <tr>
-                        <td>${entry.getKey().getId()}</td>
-                        <td>${entry.getKey().getName()}</td>
-                        <td>
-                            @if(entry.getValue() != null)
-                                ${Methods.timeFormat(entry.getValue().getCreatedAt())}
-                            @else
-                                Нет проверок
-                            @endif
-                        </td>
-                        <td>
-                            @if(entry.getValue() != null)
-                                ${entry.getValue().getStatusCode()}
-                            @else
-                                -
-                            @endif
-                        </td>
-                        <td>
-                            <a href="/urls/${entry.getKey().getId()}" class="btn btn-sm btn-primary">Посмотреть</a>
-                        </td>
-                    </tr>
-                @endfor
-            </tbody>
-        </table>
-    </div>
+            @endfor
+        </tbody>
+    </table>
+
+    <a href="/" class="btn btn-success mt-3">Добавить URL</a>
 }
