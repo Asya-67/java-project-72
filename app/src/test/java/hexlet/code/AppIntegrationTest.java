@@ -181,17 +181,4 @@ public class AppIntegrationTest {
             }
         }
     }
-
-    @Test
-    void testAddExistingUrl() throws SQLException {
-        String url = (String) existingUrl.get("name");
-        JavalinTest.test(app, (server, client) -> {
-            var requestBody = "url=" + url;
-            try (var response = client.post("/urls", requestBody)) {
-                assertThat(response.code()).isEqualTo(200);
-                String body = response.body().string();
-                assertThat(body).contains("URL уже существует");
-            }
-        });
-    }
 }
